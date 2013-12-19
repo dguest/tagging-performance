@@ -1,6 +1,6 @@
-# makefile for SUSY ntuple skimmer
+# makefile for tagging performance histogram filler
 # Author: Dan Guest (dguest@cern.ch)
-# Created: Wed Jul  4 15:30:40 CEST 2012
+# created: Thu Dec 19 17:34:32 EST 2013
 
 # --- set dirs
 BIN          := bin
@@ -11,9 +11,6 @@ DICT         := dict
 # --- HACKS ----
 CXXFLAG_HACKS := -Wno-literal-suffix #hdf5 header sets this off
 
-# --- external dirs 
--include local.mk		# may be used to locate HDF and other libs
-
 #  set search path
 vpath %.o    $(BIN)
 vpath %.cxx  $(SRC) 
@@ -23,6 +20,9 @@ vpath %.h    $(INC)
 # --- hdf and ndhist
 HDF_INFO := $(shell h5c++ -showconfig | grep 'Installation point:')
 HDF_PATH := $(strip $(shell echo ${HDF_INFO} | cut -d ':' -f 2 ))
+ifndef HDF_PATH
+$(error "couldn't find HDF, quitting")
+endif
 
 ND_HIST          := ndhist
 ND_HIST_INC      := $(ND_HIST)/include
@@ -49,10 +49,8 @@ CXXFLAGS     += ${CXXFLAG_HACKS}
 LIBS         := -L$(ND_HIST_LIB) -Wl,-rpath,$(ND_HIST_LIB) -lndhist
 LDFLAGS      := -Wl,-no-undefined
 
-ifdef HDF_PATH
 CXXFLAGS     += -I$(HDF_PATH)/include
 LIBS         += -L$(HDF_PATH)/lib -Wl,-rpath,$(HDF_PATH)/lib
-endif
 
 # --- HDF5 needed for hist saving
 LIBS         += -lhdf5_cpp -lhdf5 
