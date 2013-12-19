@@ -14,17 +14,19 @@ CXXFLAG_HACKS := -Wno-literal-suffix #hdf5 header sets this off
 # --- external dirs 
 -include local.mk		# may be used to locate HDF and other libs
 
-ifndef ND_HIST
-$(error "couldn't find ND_HIST, is it defined in local.mk?")
-endif
-ND_HIST_INC      := $(ND_HIST)/include
-ND_HIST_LIB      := $(ND_HIST)/lib
-
 #  set search path
 vpath %.o    $(BIN)
 vpath %.cxx  $(SRC) 
 vpath %.hh   $(INC) 
 vpath %.h    $(INC) 
+
+# --- hdf and ndhist
+HDF_INFO := $(shell h5c++ -showconfig | grep 'Installation point:')
+HDF_PATH := $(strip $(shell echo ${HDF_INFO} | cut -d ':' -f 2 ))
+
+ND_HIST          := ndhist
+ND_HIST_INC      := $(ND_HIST)/include
+ND_HIST_LIB      := $(ND_HIST)/lib
 
 # --- load in root config
 ROOTCFLAGS    := $(shell root-config --cflags)
@@ -66,47 +68,39 @@ PY_LDFLAGS += $(PY_LIB)
 PY_LDFLAGS += -shared
 
 # ---- define objects
-TOBJ        := ObjectFactory.o
-GEN_OBJ     := HistBuilder.o Jet.o
-GEN_OBJ     += Jet2DHists.o Jet1DHists.o 
-GEN_OBJ     += JetTagRescaler.o
-GEN_OBJ     += BtagConfig.o RegionConfig.o Flavor.o
-GEN_OBJ     += TruthJetHists.o RegionHistograms.o EventObjects.o
-GEN_OBJ     += Region2dKinematicHistograms.o
-GEN_OBJ     += RegionEventFilter.o 
-GEN_OBJ     += OrderedJetTagFilter.o UnorderedJetTagFilter.o
-GEN_OBJ     += RegionJetEfficiencyHistograms.o
-GEN_OBJ     += RegionBosonPtHistograms.o
-GEN_OBJ     += common_functions.o enum_converters.o
-GEN_OBJ     += BtagScaler.o BtagBuffer.o
-GEN_OBJ     += EventScalefactors.o
-EXE_OBJ     := $(GEN_OBJ) $(TOBJ) unit-test.o
+TOBJ        := #ObjectFactory.o
+GEN_OBJ     := #HistBuilder.o Jet.o
+EXE_OBJ     := $(GEN_OBJ) $(TOBJ) 
 PYLIB_OBJ   := $(GEN_OBJ) $(TOBJ)
 
 STAND_ALONE_OBJ     := $(GEN_OBJ) $(TOBJ) stand-alone.o
 
-PY_OBJ       := _hfw.o
-PY_LIB       := ../python/stop/stack/_hfw.so
+# PY_OBJ       := _hfw.o
+# PY_LIB       := ../python/stop/stack/_hfw.so
 
+ALLOBJ       := $(GEN_OBJ) $(PY_OBJ) $(TOBJ) 
 
-ALLOBJ       := $(GEN_OBJ) $(PY_OBJ) $(TOBJ) unit-test.o
+# ALLOUTPUT    := $(PY_LIB) unit-test stand-alone
+ALLOUTPUT    :=  # stand-alone
 
-ALLOUTPUT    := $(PY_LIB) unit-test stand-alone
+all: ndhist $(ALLOUTPUT) 
 
-all: $(ALLOUTPUT) 
-
-unit-test: $(EXE_OBJ:%=$(BIN)/%)
-	@echo "linking $^ --> $@"
-	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
+# unit-test: $(EXE_OBJ:%=$(BIN)/%)
+# 	@echo "linking $^ --> $@"
+# 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
 stand-alone: $(STAND_ALONE_OBJ:%=$(BIN)/%)
 	@echo "linking $^ --> $@"
 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
-$(PY_LIB): $(PYLIB_OBJ:%=$(BIN)/%) $(PY_OBJ:%=$(BIN)/%)
-	@mkdir -p $(shell dirname $(PY_LIB))
-	@echo "linking $^ --> $@"
-	@$(CXX) -o $@ $^ $(LIBS) $(PY_LDFLAGS)
+# $(PY_LIB): $(PYLIB_OBJ:%=$(BIN)/%) $(PY_OBJ:%=$(BIN)/%)
+# 	@mkdir -p $(shell dirname $(PY_LIB))
+# 	@echo "linking $^ --> $@"
+# 	@$(CXX) -o $@ $^ $(LIBS) $(PY_LDFLAGS)
+
+export HDF_PATH
+ndhist: 
+	@$(MAKE) -C $(ND_HIST) 
 
 # --------------------------------------------------
 
@@ -138,11 +132,11 @@ $(DEP)/%.d: %.cxx
 	@$(CXX) -MM -MP $(DEPTARGSTR) $(CXXFLAGS) $(PY_FLAGS) $< -o $@ 
 
 # clean
-.PHONY : clean rmdep
+.PHONY : clean rmdep ndhist
 CLEANLIST     = *~ *.o *.o~ *.d core 
 clean:
 	rm -fr $(CLEANLIST) $(CLEANLIST:%=$(BIN)/%) $(CLEANLIST:%=$(DEP)/%)
 	rm -fr $(BIN) $(ALLOUTPUT) $(DICT)
-
+	@$(MAKE) -C $(ND_HIST) clean
 rmdep: 
 	rm -f $(DEP)/*.d
