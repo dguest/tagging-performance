@@ -66,8 +66,8 @@ PY_LDFLAGS += $(PY_LIB)
 PY_LDFLAGS += -shared
 
 # ---- define objects
-TOBJ        := #ObjectFactory.o
-GEN_OBJ     := #HistBuilder.o Jet.o
+TOBJ        := TreeBuffer.o
+GEN_OBJ     := JetIter.o SmartChain.o
 EXE_OBJ     := $(GEN_OBJ) $(TOBJ) 
 PYLIB_OBJ   := $(GEN_OBJ) $(TOBJ)
 
@@ -79,7 +79,7 @@ STAND_ALONE_OBJ     := $(GEN_OBJ) $(TOBJ) stand-alone.o
 ALLOBJ       := $(GEN_OBJ) $(PY_OBJ) $(TOBJ) 
 
 # ALLOUTPUT    := $(PY_LIB) unit-test stand-alone
-ALLOUTPUT    :=  # stand-alone
+ALLOUTPUT    :=  stand-alone
 
 all: ndhist $(ALLOUTPUT) 
 
