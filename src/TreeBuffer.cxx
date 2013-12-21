@@ -5,6 +5,9 @@ TreeBuffer::TreeBuffer(const std::vector<std::string>& files) :
   m_chain(0)
 { 
   m_chain = new SmartChain("physics"); 
+  for (auto file: files) { 
+    m_chain->add(file); 
+  }
   std::string jc = "jet_AntiKt4LCTopo_"; 
   std::string fc = "flavor_component_"; 
   std::string fw = "flavor_weight_"; 
@@ -27,7 +30,6 @@ TreeBuffer::TreeBuffer(const std::vector<std::string>& files) :
   m_chain->SetBranch(jc +  fc + "jfitc_pu",	 &jet_jfitc_pu);             
   m_chain->SetBranch(jc +  fc + "jfitc_pb",	 &jet_jfitc_pb);             
   m_chain->SetBranch(jc +  fc + "jfitc_pc",      &jet_jfitc_pc);             
-
 }
 
 TreeBuffer::~TreeBuffer() { 
