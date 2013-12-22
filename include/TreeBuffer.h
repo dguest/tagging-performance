@@ -1,3 +1,4 @@
+// -*- c++ -*-  
 #ifndef TREE_BUFFER_HH
 #define TREE_BUFFER_HH
 
@@ -10,8 +11,6 @@ class TreeBuffer {
 public: 
   TreeBuffer(const std::vector<std::string>& files); 
   ~TreeBuffer(); 
-  TreeBuffer(TreeBuffer&) = delete; 
-  TreeBuffer& operator=(TreeBuffer) = delete; 
   void getEntry(int); 
   int size(); 
   std::vector<float>*  jet_pt; 
@@ -35,6 +34,8 @@ public:
   std::vector<float>*  jet_jfitc_pc;             
 
 private: 
+  TreeBuffer(TreeBuffer&); 
+  TreeBuffer& operator=(TreeBuffer); 
   SmartChain* m_chain; 
 }; 
 

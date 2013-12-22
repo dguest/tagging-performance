@@ -1,4 +1,4 @@
-#include "TreeBuffer.hh"
+#include "TreeBuffer.h"
 #include "SmartChain.hh"
 
 TreeBuffer::TreeBuffer(const std::vector<std::string>& files) : 

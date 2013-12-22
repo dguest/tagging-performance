@@ -1,4 +1,4 @@
-#include "TreeBuffer.hh"
+#include "TreeBuffer.h"
 
 #include <vector>
 #include <string> 

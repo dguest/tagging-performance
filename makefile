@@ -16,6 +16,8 @@ vpath %.o    $(BIN)
 vpath %.cxx  $(SRC) 
 vpath %.hh   $(INC) 
 vpath %.h    $(INC) 
+vpath %Dict.h $(DICT)
+vpath %Dict.cxx $(DICT)
 
 # --- hdf and ndhist
 HDF_INFO := $(shell h5c++ -showconfig | grep 'Installation point:')
@@ -70,8 +72,9 @@ TOBJ        := TreeBuffer.o
 GEN_OBJ     := JetIter.o SmartChain.o
 EXE_OBJ     := $(GEN_OBJ) $(TOBJ) 
 PYLIB_OBJ   := $(GEN_OBJ) $(TOBJ)
+T_DICTS     := $(TOBJ:.o=Dict.o)
 
-STAND_ALONE_OBJ     := $(GEN_OBJ) $(TOBJ) stand-alone.o
+STAND_ALONE_OBJ     := $(GEN_OBJ) $(TOBJ) $(T_DICTS) stand-alone.o
 
 # PY_OBJ       := _hfw.o
 # PY_LIB       := ../python/stop/stack/_hfw.so
@@ -113,6 +116,19 @@ $(BIN)/%.o: %.cxx
 	@echo compiling $<
 	@mkdir -p $(BIN)
 	@$(CXX) -c $(CXXFLAGS) $< -o $@
+
+# root dictionary generation 
+$(DICT)/%Dict.cxx: %.h LinkDef.hh
+	@echo making dict $@
+	@mkdir -p $(DICT)
+	@rm -f $(DICT)/$*Dict.hh $(DICT)/$*Dict.cxx 
+	@rootcint $@ -c $(INC)/$*.h
+	@sed -i 's,#include "$(INC)/\(.*\)",#include "\1",g' $(DICT)/$*Dict.h
+
+$(BIN)/%Dict.o: $(DICT)/%Dict.cxx 
+	@mkdir -p $(BIN)
+	@echo compiling dict $@
+	@$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -c $< -o $@
 
 # use auto dependency generation
 DEP = $(BIN)
