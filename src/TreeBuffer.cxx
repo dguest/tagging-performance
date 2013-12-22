@@ -1,13 +1,21 @@
 #include "TreeBuffer.h"
 #include "SmartChain.hh"
+#include "TROOT.h"
 
 TreeBuffer::TreeBuffer(const std::vector<std::string>& files) : 
   m_chain(0)
 { 
+  // thanks for this line, ROOT, really. As if we needed any more proof that 
+  // this framework is a complete pile of shit, you've added some cryptic
+  // bullshit that we all have to add to out files to read a fucking
+  // D3PD... Not even a complicated class, a fucking D3PD...
+  gROOT->ProcessLine("#include <vector>");
+
   m_chain = new SmartChain("physics"); 
   for (auto file: files) { 
     m_chain->add(file); 
   }
+
   std::string jc = "jet_AntiKt4LCTopo_"; 
   std::string fc = "flavor_component_"; 
   std::string fw = "flavor_weight_"; 
