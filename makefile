@@ -121,7 +121,7 @@ $(BIN)/%.o: %.cxx
 $(DICT)/%Dict.cxx: %.h LinkDef.hh
 	@echo making dict $@
 	@mkdir -p $(DICT)
-	@rm -f $(DICT)/$*Dict.hh $(DICT)/$*Dict.cxx 
+	@rm -f $(DICT)/$*Dict.h $(DICT)/$*Dict.cxx 
 	@rootcint $@ -c $(INC)/$*.h
 	@sed -i 's,#include "$(INC)/\(.*\)",#include "\1",g' $(DICT)/$*Dict.h
 
