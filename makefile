@@ -69,7 +69,7 @@ PY_LDFLAGS += -shared
 
 # ---- define objects
 TOBJ        := TreeBuffer.o
-GEN_OBJ     := JetIter.o SmartChain.o
+GEN_OBJ     := SmartChain.o JetPerfHists.o JetIter.o
 EXE_OBJ     := $(GEN_OBJ) $(TOBJ) 
 PYLIB_OBJ   := $(GEN_OBJ) $(TOBJ)
 T_DICTS     := $(TOBJ:.o=Dict.o)
