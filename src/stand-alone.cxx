@@ -1,5 +1,5 @@
 #include "TreeBuffer.h"
-#include "JetIter.hh"
+#include "Jet.hh"
 
 #include <vector>
 #include <string> 
@@ -12,12 +12,9 @@ int main(int narg, char* argv[]) {
     buffer.getEntry(event); 
     const int n_jets = buffer.jet_pt->size(); 
     for (int jidx = 0; jidx < n_jets; jidx++) { 
-      printf("pt: %f\n", buffer.jet_pt->at(jidx)); 
+      Jet jet(buffer, jidx); 
+      printf("pt: %f\n", jet.pt); 
     }
-  }
-
-  for (const Jet& jet: JetIter(&buffer)) { 
-    printf("iter pt: %f\n", jet.pt); 
   }
 
   return 0; 
