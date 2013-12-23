@@ -9,7 +9,8 @@ void TagVectors::set(SmartChain* chain, std::string prefix) {
 }
 
 TreeBuffer::TreeBuffer(const std::vector<std::string>& files) : 
-  m_chain(0)
+  m_chain(0), 
+  m_entry(0)
 { 
   // thanks for this line, ROOT, really. As if we needed any more proof that 
   // this framework is a complete pile of shit, you've added some cryptic
@@ -45,8 +46,13 @@ TreeBuffer::~TreeBuffer() {
 }
 
 void TreeBuffer::getEntry(int entry) { 
+  m_entry = entry; 
   m_chain->GetEntry(entry); 
 }
 int TreeBuffer::size() { 
   return m_chain->GetEntries(); 
+}
+
+int TreeBuffer::entry() const { 
+  return m_entry; 
 }

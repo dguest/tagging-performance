@@ -4,12 +4,23 @@
 #include <cstddef>
 
 class TreeBuffer; 
+class TagVectors; 
+
+struct TagTriple { 
+  TagTriple(); 
+  TagTriple(const TagVectors&, int index); 
+  float pu; 
+  float pc; 
+  float pb; 
+};
 
 struct Jet { 
   Jet(); 
   Jet(const TreeBuffer&, int index); 
+  int event; 
   float pt; 
   float eta; 
+  bool valid; 
   float mv1; 
   float mv1c; 
   float mv2c00; 
@@ -17,13 +28,9 @@ struct Jet {
   float mv2c20; 
   float mvb; 
   int truth_label; 
-  float jf_pu; 
-  float jf_pc; 
-  float jf_pb; 
-  float gaia_pu; 
-  float gaia_pc; 
-  float gaia_pb; 
-  bool valid; 
+  TagTriple gaia; 
+  TagTriple jfit; 
+  TagTriple jfc; 
 }; 
 
 class JetIter { 
@@ -32,12 +39,13 @@ public:
   class const_iterator { 
     friend class JetIter; 
   public: 
+    const_iterator() = delete; 
     const Jet& operator*() const; 
     const const_iterator& operator++(); 
     bool operator==(const const_iterator& other) const; 
     bool operator!=(const const_iterator& other) const; 
   private: 
-    const_iterator(TreeBuffer*, int); 
+    const_iterator(TreeBuffer*, int, bool read = true); 
     Jet m_jet; 
     size_t m_jet_n; 
     size_t m_jets_event; 

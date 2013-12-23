@@ -20,6 +20,7 @@ public:
   ~TreeBuffer(); 
   void getEntry(int); 
   int size(); 
+  int entry() const; 
   std::vector<float>*  jet_pt; 
   std::vector<float>*  jet_eta; 
   std::vector<float>*  jet_MV1; 
@@ -38,6 +39,7 @@ private:
   TreeBuffer(TreeBuffer&); 
   TreeBuffer& operator=(TreeBuffer); 
   SmartChain* m_chain; 
+  int m_entry; 
 }; 
 
 #endif 
