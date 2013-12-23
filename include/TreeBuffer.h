@@ -7,6 +7,13 @@ class SmartChain;
 #include <vector> 
 #include <string> 
 
+struct TagVectors { 
+  void set(SmartChain* chain, std::string prefix); 
+  std::vector<float>* pu; 
+  std::vector<float>* pc; 
+  std::vector<float>* pb; 
+}; 
+
 class TreeBuffer { 
 public: 
   TreeBuffer(const std::vector<std::string>& files); 
@@ -22,16 +29,10 @@ public:
   std::vector<float>*  jet_MV2c20;
   std::vector<float>*  jet_MVb;
   std::vector<int>  *  jet_flavor_truth_label;
-  std::vector<float>*  jet_jfit_pu;
-  std::vector<float>*  jet_jfit_pb;
-  std::vector<float>*  jet_jfit_pc;
-  std::vector<float>*  jet_gaia_pu;
-  std::vector<float>*  jet_gaia_pb;
-  std::vector<float>*  jet_gaia_pc;
+  TagVectors gaia; 
+  TagVectors jfit; 
+  TagVectors jfc; 
   std::vector<int>  *  jet_gaia_isValid; 
-  std::vector<float>*  jet_jfitc_pu;
-  std::vector<float>*  jet_jfitc_pb;
-  std::vector<float>*  jet_jfitc_pc;             
 
 private: 
   TreeBuffer(TreeBuffer&); 

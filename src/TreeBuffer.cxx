@@ -2,6 +2,12 @@
 #include "SmartChain.hh"
 #include "TROOT.h"
 
+void TagVectors::set(SmartChain* chain, std::string prefix) { 
+  chain->SetBranch(prefix + "pu", &pu); 
+  chain->SetBranch(prefix + "pc", &pc); 
+  chain->SetBranch(prefix + "pb", &pb); 
+}
+
 TreeBuffer::TreeBuffer(const std::vector<std::string>& files) : 
   m_chain(0)
 { 
@@ -28,16 +34,10 @@ TreeBuffer::TreeBuffer(const std::vector<std::string>& files) :
   m_chain->SetBranch(jc + fw + "MV2c20",	 &jet_MV2c20);               
   m_chain->SetBranch(jc + fw + "MVb",		 &jet_MVb);                  
   m_chain->SetBranch(jc + "flavor_truth_label",	 &jet_flavor_truth_label);   
-  m_chain->SetBranch(jc +  fc + "jfit_pu",	 &jet_jfit_pu);              
-  m_chain->SetBranch(jc +  fc + "jfit_pb",	 &jet_jfit_pb);              
-  m_chain->SetBranch(jc +  fc + "jfit_pc",	 &jet_jfit_pc);              
-  m_chain->SetBranch(jc +  fc + "gaia_pu",	 &jet_gaia_pu);              
-  m_chain->SetBranch(jc +  fc + "gaia_pb",	 &jet_gaia_pb);              
-  m_chain->SetBranch(jc +  fc + "gaia_pc",	 &jet_gaia_pc);              
+  gaia.set(m_chain, jc + fc + "gaia_"); 
+  jfit.set(m_chain, jc + fc + "jfit_"); 
+  jfc.set(m_chain, jc + fc + "jfitc_"); 
   m_chain->SetBranch(jc +  fc + "gaia_isValid",  &jet_gaia_isValid);         
-  m_chain->SetBranch(jc +  fc + "jfitc_pu",	 &jet_jfitc_pu);             
-  m_chain->SetBranch(jc +  fc + "jfitc_pb",	 &jet_jfitc_pb);             
-  m_chain->SetBranch(jc +  fc + "jfitc_pc",      &jet_jfitc_pc);             
 }
 
 TreeBuffer::~TreeBuffer() { 
