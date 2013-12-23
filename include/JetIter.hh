@@ -4,8 +4,10 @@
 class TreeBuffer; 
 
 struct Jet { 
+  Jet(); 
   Jet(const TreeBuffer&, int index); 
   float pt; 
+  bool valid; 
 }; 
 
 class JetIter { 
@@ -20,12 +22,12 @@ public:
     bool operator!=(const const_iterator& other) const; 
   private: 
     const_iterator(TreeBuffer*, int); 
-    mutable Jet m_jet; 
+    Jet m_jet; 
     int m_jet_n; 
     int m_jets_event; 
     int m_event_n; 
+    int m_events; 
     TreeBuffer* m_buffer; 
-    mutable bool m_valid; 
   }; 
   const_iterator begin() const; 
   const_iterator end() const; 

@@ -15,7 +15,7 @@ int main(int narg, char* argv[]) {
       printf("pt: %f\n", buffer.jet_pt->at(jidx)); 
     }
   }
-  for (Jet jet: JetIter(buffer)) { 
+  for (const Jet& jet: JetIter(buffer)) { 
     printf("iter pt: %f\n", jet.pt); 
   }
 
