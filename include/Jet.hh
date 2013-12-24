@@ -1,10 +1,12 @@
-#ifndef JET_ITER_HH
-#define JET_ITER_HH
+#ifndef JET_HH
+#define JET_HH
 
 #include <cstddef>
 
 class TreeBuffer; 
 class TagVectors; 
+
+enum class Flavor {B, C, U, T, DATA, ERROR}; 
 
 struct TagTriple { 
   TagTriple(); 
@@ -27,10 +29,12 @@ struct Jet {
   float mv2c10; 
   float mv2c20; 
   float mvb; 
-  int truth_label; 
+  Flavor truth_label; 
   TagTriple gaia; 
   TagTriple jfit; 
   TagTriple jfc; 
+private: 
+  Flavor getFlavor(int); 
 }; 
 
 

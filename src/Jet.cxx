@@ -16,7 +16,8 @@ TagTriple::TagTriple(const TagVectors& buff, int index):
 
 Jet::Jet() : 
   pt(-999), 
-  valid(false)
+  valid(false), 
+  truth_label(Flavor::ERROR)
 { 
 }
 
@@ -31,10 +32,19 @@ Jet::Jet(const TreeBuffer& buff, int index) :
   mv2c10(buff.jet_MV2c10->at(index)), 
   mv2c20(buff.jet_MV2c20->at(index)), 
   mvb(buff.jet_MVb->at(index)), 
-  truth_label(buff.jet_flavor_truth_label->at(index)), 
+  truth_label(getFlavor(buff.jet_flavor_truth_label->at(index))), 
   gaia(buff.gaia, index), 
   jfit(buff.jfit, index), 
   jfc(buff.jfc, index)
 { 
 }
 
+Flavor Jet::getFlavor(int ftl) { 
+  switch(ftl) { 
+  case 5: return Flavor::B; 
+  case 4: return Flavor::C; 
+  case 0: return Flavor::U; 
+  case 15: return Flavor::T; 
+  default: return Flavor::ERROR; 
+  }
+}
