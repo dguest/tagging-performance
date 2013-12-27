@@ -3,3 +3,4 @@ stand-alone
 /bin/
 
 /dict/
+*.h5

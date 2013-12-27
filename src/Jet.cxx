@@ -24,7 +24,7 @@ Jet::Jet() :
 Jet::Jet(const TreeBuffer& buff, int index) : 
   event(buff.entry()), 
   pt(buff.jet_pt->at(index)), 
-  eta(buff.jet_pt->at(index)),
+  eta(buff.jet_eta->at(index)),
   valid(true), 
   mv1(buff.jet_MV1->at(index)), 
   mv1c(buff.jet_MV1c->at(index)), 
