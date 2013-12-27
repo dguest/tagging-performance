@@ -12,8 +12,16 @@
 
 int main(int narg, char* argv[]) { 
   std::string out_name = "test.h5"; 
+  if (narg == 1) {
+    printf("no files\n"); 
+    exit(1);
+  }
   if (exists(out_name)) throw std::runtime_error(out_name + " exists"); 
-  std::vector<std::string> files = {"test.root"}; 
+
+  std::vector<std::string> files; 
+  for (int pos = 1; pos < narg; pos++) { 
+    files.push_back(argv[pos]); 
+  }
   TreeBuffer buffer(files); 
 
   JetPerfHists hists; 
