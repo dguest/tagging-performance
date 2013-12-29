@@ -35,6 +35,7 @@ BtagHists::BtagHists() :
 BtagHists::~BtagHists() { 
   delete m_mv1; 
   delete m_gaia_anti_light; 
+  delete m_gaia_anti_charm; 
   delete m_mv2c00; 
   delete m_mv2c20; 
 }
