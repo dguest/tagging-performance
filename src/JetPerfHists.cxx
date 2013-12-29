@@ -6,11 +6,13 @@
 
 #include <stdexcept> 
 #include <cmath>
+#include <limits>
 
 namespace {
   double btagAntiU(const TagTriple&); 
   double btagAntiC(const TagTriple&); 
   std::string flavorString(Flavor); 
+  std::string binString(double); 
 } 
 
 // ======== btag hists ==============
@@ -55,13 +57,46 @@ void BtagHists::writeTo(H5::CommonFG& fg) {
 
 // ============ flavored hists ================
 
+FlavoredHists::FlavoredHists(): 
+  m_pt_btag(12)
+{ 
+  static_assert(std::numeric_limits<double>::has_infinity, "no infinity"); 
+  const std::vector<double> pt_bins_gev{
+    0, 20, 30, 40, 50, 60, 75, 90, 110, 150, 200, 600, 
+      std::numeric_limits<double>::infinity()}; 
+  // upper_bound should never pick the bin with upper edge 20
+  size_t bin = -1; 
+  for (auto pt: pt_bins_gev) { 
+    m_pt_bins[pt * 1e3] = bin; 
+    bin++; 
+  }
+}
+
 void FlavoredHists::fill(const Jet& jet, double weight) { 
   m_btag.fill(jet, weight); 
+  auto pt_itr = m_pt_bins.upper_bound(jet.pt); 
+  if (pt_itr != m_pt_bins.end()) { 
+    m_pt_btag.at(pt_itr->second).fill(jet, weight); 
+  }
 }
 
 void FlavoredHists::writeTo(H5::CommonFG& fg) { 
   H5::Group btag_group(fg.createGroup("btag")); 
-  m_btag.writeTo(btag_group); 
+  H5::Group all_pt(btag_group.createGroup("all")); 
+  m_btag.writeTo(all_pt); 
+
+  H5::Group pt_bins(btag_group.createGroup("ptBins")); 
+  std::string last_bin = "NONE"; 
+  for (auto pt_itr: m_pt_bins) { 
+    std::string bin_high = binString(pt_itr.first); 
+    if ( (pt_itr.second >= 0) && (pt_itr.second < m_pt_bins.size() )) { 
+      auto bin_name = last_bin + "-" + bin_high; 
+      H5::Group this_bin(pt_bins.createGroup(bin_name)); 
+      auto& pt_hist = m_pt_btag.at(pt_itr.second); 
+      pt_hist.writeTo(this_bin); 
+    }
+    last_bin = bin_high; 
+  }
 }
 
 // ====== JetPerfHists (top level) =======
@@ -104,5 +139,8 @@ namespace {
     case Flavor::T: return "T"; 
     default: throw std::domain_error("what the fuck his that..."); 
     }
+  }
+  std::string binString(double val) { 
+    return std::isinf(val) ? "INF" : std::to_string(int(val) / 1000); 
   }
 } 

@@ -8,6 +8,8 @@ namespace H5 {
 }
 
 #include <vector> 
+#include <map>
+#include <cstddef>		// size_t
 
 namespace hist { 
   const int N_BINS = 10000; 
@@ -34,10 +36,13 @@ private:
 
 class FlavoredHists { 
 public: 
+  FlavoredHists(); 
   void fill(const Jet&, double weight); 
   void writeTo(H5::CommonFG&); 
 private: 
   BtagHists m_btag; 
+  std::vector<BtagHists> m_pt_btag; 
+  std::map<double, size_t> m_pt_bins; 
 }; 
 
 class JetPerfHists { 
