@@ -86,6 +86,7 @@ ALLOBJ       := $(GEN_OBJ) $(PY_OBJ) $(TOBJ)
 ALLOUTPUT    :=  stand-alone
 
 all: ndhist $(ALLOUTPUT) 
+	@$(shell ./install/pysetup.py install)
 
 # unit-test: $(EXE_OBJ:%=$(BIN)/%)
 # 	@echo "linking $^ --> $@"
@@ -153,5 +154,7 @@ clean:
 	rm -fr $(CLEANLIST) $(CLEANLIST:%=$(BIN)/%) $(CLEANLIST:%=$(DEP)/%)
 	rm -fr $(BIN) $(ALLOUTPUT) $(DICT)
 	@$(MAKE) -C $(ND_HIST) clean
+	@$(shell ./install/pysetup.py remove)
+
 rmdep: 
 	rm -f $(DEP)/*.d
