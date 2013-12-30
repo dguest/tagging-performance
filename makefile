@@ -3,16 +3,16 @@
 # created: Thu Dec 19 17:34:32 EST 2013
 
 # --- set dirs
-BIN          := bin
+BIN          := build
 SRC          := src
 INC          := include
 DICT         := dict
+OUTPUT       := scripts
 
 # --- HACKS ----
 CXXFLAG_HACKS := -Wno-literal-suffix #hdf5 header sets this off
 
 #  set search path
-vpath %.o    $(BIN)
 vpath %.cxx  $(SRC) 
 vpath %.hh   $(INC) 
 vpath %.h    $(INC) 
@@ -83,7 +83,8 @@ STAND_ALONE_OBJ     := $(GEN_OBJ) $(TOBJ) $(T_DICTS) stand-alone.o
 ALLOBJ       := $(GEN_OBJ) $(PY_OBJ) $(TOBJ) 
 
 # ALLOUTPUT    := $(PY_LIB) unit-test stand-alone
-ALLOUTPUT    :=  stand-alone
+STAND_ALONE  := tag-perf-hists
+ALLOUTPUT    := $(OUTPUT)/$(STAND_ALONE)
 
 all: ndhist $(ALLOUTPUT) 
 	@$(shell ./install/pysetup.py install)
@@ -92,7 +93,8 @@ all: ndhist $(ALLOUTPUT)
 # 	@echo "linking $^ --> $@"
 # 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
-stand-alone: $(STAND_ALONE_OBJ:%=$(BIN)/%)
+$(OUTPUT)/tag-perf-hists: $(STAND_ALONE_OBJ:%=$(BIN)/%)
+	@mkdir -p $(OUTPUT)
 	@echo "linking $^ --> $@"
 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 

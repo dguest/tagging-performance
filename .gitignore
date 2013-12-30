@@ -1,6 +1,9 @@
-test.root
-stand-alone
-/bin/
-
-/dict/
+*.root
 *.h5
+/build/
+/bin/
+/dict/
+
+# output binaries
+stand-alone
+tag-perf-hists
