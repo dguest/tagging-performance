@@ -11,6 +11,7 @@ enum class Flavor {B, C, U, T, DATA, ERROR};
 struct TagTriple { 
   TagTriple(); 
   TagTriple(const TagVectors&, int index); 
+  bool allNonzero() const; 
   float pu; 
   float pc; 
   float pb; 

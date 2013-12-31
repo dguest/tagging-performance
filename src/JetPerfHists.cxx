@@ -6,6 +6,7 @@
 
 #include <stdexcept> 
 #include <cmath>
+#include <cassert> 
 #include <limits>
 
 namespace {
@@ -135,12 +136,15 @@ void JetPerfHists::writeTo(H5::CommonFG& fg) {
 
 namespace {
   double btagAntiU(const TagTriple& tr) { 
+    assert(tr.allNonzero()); 
     return log(tr.pb / tr.pu); 
   }
   double btagAntiC(const TagTriple& tr) { 
+    assert(tr.allNonzero()); 
     return log(tr.pb / tr.pc); 
   }
   double gr1(const TagTriple& tr) { 
+    assert(tr.allNonzero()); 
     return log(tr.pb / sqrt(tr.pc * tr.pu)); 
   }
   

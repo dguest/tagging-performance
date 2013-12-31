@@ -14,6 +14,10 @@ TagTriple::TagTriple(const TagVectors& buff, int index):
 { 
 }
 
+bool TagTriple::allNonzero() const { 
+  return pu && pb && pc; 
+}
+
 Jet::Jet() : 
   pt(-999), 
   valid(false), 
