@@ -30,15 +30,16 @@ BtagHists::BtagHists() :
 {
   using namespace hist; 
   unsigned hflag = hist::eat_nan; 
-  const Axis mv_axis = {"x", N_BINS, 0.0, 1.0, ""}; 
+  const Axis mv1_axis = {"x", N_BINS, 0.0, 1.0, ""}; 
+  const Axis mv2_axis = {"x", N_BINS, -1.0, 1.0, ""}; 
   const Axis gaia_axis = {"x", N_BINS, GAIA_LOW, GAIA_HIGH, ""}; 
-  m_mv1 = new Histogram({mv_axis}, hflag); 
+  m_mv1 = new Histogram({mv1_axis}, hflag); 
   m_gaia_anti_light = new Histogram({gaia_axis}, hflag); 
   m_gaia_anti_charm = new Histogram({gaia_axis}, hflag); 
   m_gaia_gr1 = new Histogram({gaia_axis}, hflag); 
-  m_mv2c00 = new Histogram({mv_axis}, hflag); 
-  m_mv2c10 = new Histogram({mv_axis}, hflag); 
-  m_mv2c20 = new Histogram({mv_axis}, hflag); 
+  m_mv2c00 = new Histogram({mv2_axis}, hflag); 
+  m_mv2c10 = new Histogram({mv2_axis}, hflag); 
+  m_mv2c20 = new Histogram({mv2_axis}, hflag); 
 }
 
 BtagHists::~BtagHists() { 
