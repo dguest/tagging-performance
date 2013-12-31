@@ -26,13 +26,9 @@ int buildHists(std::vector<std::string> files, std::string out_name){
     const int n_jets = buffer.jet_pt->size(); 
     total_jets += n_jets; 
     for (int jidx = 0; jidx < n_jets; jidx++) { 
-      try { 
       Jet jet(buffer, jidx); 
       if (jet.pt < 20e3 || std::abs(jet.eta) > 2.5) continue; 
       hists.fill(jet, 1.0); 
-      } catch (BadJetError& e) { 
-	error_jets++; 
-      }
     }
   }
   
