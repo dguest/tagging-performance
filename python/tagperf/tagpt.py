@@ -13,8 +13,10 @@ import warnings
 
 def make_plots(in_file_name, out_dir): 
     with h5py.File(in_file_name, 'r') as in_file: 
-        for rej_flavor in 'UC': 
-            draw_pt_bins(in_file, out_dir, rej_flavor=rej_flavor)
+        for eff in [0.6, 0.7, 0.8]: 
+            for rej_flavor in 'UC': 
+                draw_pt_bins(in_file, out_dir, rej_flavor=rej_flavor, 
+                             eff=eff)
 
 def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U'): 
     fig = Figure(figsize=(8,6))
@@ -27,17 +29,19 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U'):
         rej_group = in_file['{}/btag/ptBins'.format(rej_flavor)]
         x_vals, y_vals, x_err, y_err = _get_pt_xy(
             eff_group, rej_group, pt_bins, eff, tagger=tagger)
-        ax.errorbar(x_vals, y_vals, xerr=x_err, yerr=y_err, label=tagger)
-    ax.legend(numpoints=1)
+        ax.errorbar(
+            x_vals, y_vals, label=tagger, #xerr=x_err, 
+            yerr=y_err)
+    ax.legend(numpoints=1, loc='upper left')
     ax.set_xlim(20, np.max(x_vals) * 1.1)
     ax.set_xlabel('$p_{\mathrm{T}}$ [GeV]', x=0.98, ha='right')
     ax.set_ylabel(rej_label(rej_flavor, eff), y=0.98, va='top')
     x_formatter = FuncFormatter(tick_format)
     ax.xaxis.set_minor_formatter(x_formatter)
     ax.xaxis.set_major_formatter(x_formatter)
-    canvas.print_figure(
-        '{}/{}_rej_ptbins.pdf'.format(out_dir, rej_flavor), 
-        bbox_inches='tight')
+    out_name = '{}/{}_rej{}_ptbins.pdf'.format(
+        out_dir, rej_flavor, int(eff*100))
+    canvas.print_figure(out_name, bbox_inches='tight')
 
 def _check_round(eff, target, warn_tolerance=0.01, err_tolerance=0.1): 
     roundoff_frac = abs((target - eff) / eff)
