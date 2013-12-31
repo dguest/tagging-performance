@@ -42,8 +42,8 @@ BtagHists::~BtagHists() {
 
 void BtagHists::fill(const Jet& jet, double weight) { 
   m_mv1->fill(jet.mv1, weight); 
-  m_gaia_anti_light->fill(btagAntiC(jet.gaia), weight); 
-  m_gaia_anti_charm->fill(btagAntiU(jet.gaia), weight); 
+  m_gaia_anti_light->fill(btagAntiU(jet.gaia), weight); 
+  m_gaia_anti_charm->fill(btagAntiC(jet.gaia), weight); 
   m_mv2c00->fill(jet.mv2c00, weight); 
   m_mv2c20->fill(jet.mv2c20, weight); 
 }

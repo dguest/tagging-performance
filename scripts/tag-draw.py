@@ -3,6 +3,7 @@
 import argparse
 import sys
 from tagperf import tagroc
+from tagperf import tagpt
 
 def run(): 
     parser = argparse.ArgumentParser()
@@ -12,6 +13,7 @@ def run():
         default='plots')
     args = parser.parse_args(sys.argv[1:])
     tagroc.make_plots(args.hdf_file, args.out_dir)
+    tagpt.make_plots(args.hdf_file, args.out_dir)
 
 if __name__ == '__main__': 
     run()
