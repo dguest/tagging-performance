@@ -12,9 +12,6 @@ TagTriple::TagTriple(const TagVectors& buff, int index):
   pc(buff.pc->at(index)), 
   pb(buff.pb->at(index))
 { 
-  if (!allNonzero()) { 
-    throw BadJetError("some p values are zero"); 
-  }
 }
 
 bool TagTriple::allNonzero() const { 
