@@ -2,6 +2,7 @@
 #define JET_HH
 
 #include <cstddef>
+#include <stdexcept> 
 
 class TreeBuffer; 
 class TagVectors; 
@@ -36,6 +37,13 @@ struct Jet {
   TagTriple jfc; 
 private: 
   Flavor getFlavor(int); 
+}; 
+
+
+class BadJetError: public std::range_error
+{
+public: 
+  BadJetError(const std::string& problem); 
 }; 
 
 

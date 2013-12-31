@@ -12,6 +12,9 @@ TagTriple::TagTriple(const TagVectors& buff, int index):
   pc(buff.pc->at(index)), 
   pb(buff.pb->at(index))
 { 
+  if (!allNonzero()) { 
+    throw BadJetError("some p values are zero"); 
+  }
 }
 
 bool TagTriple::allNonzero() const { 
@@ -51,4 +54,11 @@ Flavor Jet::getFlavor(int ftl) {
   case 15: return Flavor::T; 
   default: return Flavor::ERROR; 
   }
+}
+
+
+// ===== exceptions =====
+BadJetError::BadJetError(const std::string& problem) : 
+  std::range_error(problem)
+{ 
 }

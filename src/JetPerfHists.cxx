@@ -23,7 +23,9 @@ BtagHists::BtagHists() :
   m_mv1(0), 
   m_gaia_anti_light(0), 
   m_gaia_anti_charm(0), 
+  m_gaia_gr1(0), 
   m_mv2c00(0), 
+  m_mv2c10(0), 
   m_mv2c20(0)
 {
   using namespace hist; 
@@ -136,15 +138,12 @@ void JetPerfHists::writeTo(H5::CommonFG& fg) {
 
 namespace {
   double btagAntiU(const TagTriple& tr) { 
-    assert(tr.allNonzero()); 
     return log(tr.pb / tr.pu); 
   }
   double btagAntiC(const TagTriple& tr) { 
-    assert(tr.allNonzero()); 
     return log(tr.pb / tr.pc); 
   }
   double gr1(const TagTriple& tr) { 
-    assert(tr.allNonzero()); 
     return log(tr.pb / sqrt(tr.pc * tr.pu)); 
   }
   
@@ -161,3 +160,4 @@ namespace {
     return std::isinf(val) ? "INF" : std::to_string(int(val) / 1000); 
   }
 } 
+
