@@ -13,7 +13,8 @@ import warnings
 
 def make_plots(in_file_name, out_dir): 
     with h5py.File(in_file_name, 'r') as in_file: 
-        draw_pt_bins(in_file, out_dir)
+        for rej_flavor in 'UC': 
+            draw_pt_bins(in_file, out_dir, rej_flavor=rej_flavor)
 
 def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U'): 
     fig = Figure(figsize=(8,6))

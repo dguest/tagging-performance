@@ -11,6 +11,7 @@
 namespace {
   double btagAntiU(const TagTriple&); 
   double btagAntiC(const TagTriple&); 
+  double gr1(const TagTriple&); 
   std::string flavorString(Flavor); 
   std::string binString(double); 
 } 
@@ -28,7 +29,9 @@ BtagHists::BtagHists() :
   m_mv1 = new Histogram(N_BINS, 0.0, 1.0); 
   m_gaia_anti_light = new Histogram(N_BINS, GAIA_LOW, GAIA_HIGH); 
   m_gaia_anti_charm = new Histogram(N_BINS, GAIA_LOW, GAIA_HIGH); 
+  m_gaia_gr1 = new Histogram(N_BINS, GAIA_LOW, GAIA_HIGH); 
   m_mv2c00 = new Histogram(N_BINS, 0.0, 1.0); 
+  m_mv2c10 = new Histogram(N_BINS, 0.0, 1.0); 
   m_mv2c20 = new Histogram(N_BINS, 0.0, 1.0); 
 }
 
@@ -36,7 +39,9 @@ BtagHists::~BtagHists() {
   delete m_mv1; 
   delete m_gaia_anti_light; 
   delete m_gaia_anti_charm; 
+  delete m_gaia_gr1; 
   delete m_mv2c00; 
+  delete m_mv2c10; 
   delete m_mv2c20; 
 }
 
@@ -44,7 +49,9 @@ void BtagHists::fill(const Jet& jet, double weight) {
   m_mv1->fill(jet.mv1, weight); 
   m_gaia_anti_light->fill(btagAntiU(jet.gaia), weight); 
   m_gaia_anti_charm->fill(btagAntiC(jet.gaia), weight); 
+  m_gaia_gr1->fill(gr1(jet.gaia), weight); 
   m_mv2c00->fill(jet.mv2c00, weight); 
+  m_mv2c10->fill(jet.mv2c10, weight); 
   m_mv2c20->fill(jet.mv2c20, weight); 
 }
 
@@ -52,7 +59,9 @@ void BtagHists::writeTo(H5::CommonFG& fg) {
   m_mv1->write_to(fg, "mv1"); 
   m_gaia_anti_light->write_to(fg, "gaiaAntiU"); 
   m_gaia_anti_charm->write_to(fg, "gaiaAntiC"); 
+  m_gaia_gr1->write_to(fg, "gaiaGr1"); 
   m_mv2c00->write_to(fg, "mv2c00"); 
+  m_mv2c10->write_to(fg, "mv2c10"); 
   m_mv2c20->write_to(fg, "mv2c20"); 
 }
 
@@ -130,6 +139,9 @@ namespace {
   }
   double btagAntiC(const TagTriple& tr) { 
     return log(tr.pb / tr.pc); 
+  }
+  double gr1(const TagTriple& tr) { 
+    return log(tr.pb / sqrt(tr.pc * tr.pu)); 
   }
   
   std::string flavorString(Flavor flavor) { 

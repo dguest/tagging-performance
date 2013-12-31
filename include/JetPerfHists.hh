@@ -30,7 +30,9 @@ private:
   Histogram* m_mv1; 
   Histogram* m_gaia_anti_light; 
   Histogram* m_gaia_anti_charm; 
+  Histogram* m_gaia_gr1; 
   Histogram* m_mv2c00; 
+  Histogram* m_mv2c10; 
   Histogram* m_mv2c20; 
 }; 
 
