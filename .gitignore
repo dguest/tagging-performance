@@ -1,8 +1,11 @@
 *.root
 *.h5
+*.pyc
+*.pyo
 /build/
 /bin/
 /dict/
+/plots/
 
 # output binaries
 stand-alone
