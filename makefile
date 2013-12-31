@@ -26,7 +26,7 @@ ifndef HDF_PATH
 $(error "couldn't find HDF, quitting")
 endif
 
-ND_HIST          := ndhist
+ND_HIST          := $(CURDIR)/ndhist
 ND_HIST_INC      := $(ND_HIST)/include
 ND_HIST_LIB      := $(ND_HIST)/lib
 
