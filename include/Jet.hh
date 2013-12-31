@@ -35,6 +35,7 @@ struct Jet {
   TagTriple gaia; 
   TagTriple jfit; 
   TagTriple jfc; 
+  bool gaia_valid; 
 private: 
   Flavor getFlavor(int); 
 }; 

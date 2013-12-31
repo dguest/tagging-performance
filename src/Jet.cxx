@@ -42,7 +42,8 @@ Jet::Jet(const TreeBuffer& buff, int index) :
   truth_label(getFlavor(buff.jet_flavor_truth_label->at(index))), 
   gaia(buff.gaia, index), 
   jfit(buff.jfit, index), 
-  jfc(buff.jfc, index)
+  jfc(buff.jfc, index), 
+  gaia_valid(buff.jet_gaia_isValid->at(index))
 { 
 }
 
