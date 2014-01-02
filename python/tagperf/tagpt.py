@@ -22,6 +22,7 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf'):
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
+    ax.grid(which='both')
     ax.set_xscale('log')
     for tagger in tagschema.get_taggers(in_file): 
         pt_bins = tagschema.get_pt_bins(in_file['B/btag/ptBins'])

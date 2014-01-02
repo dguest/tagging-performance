@@ -17,6 +17,7 @@ def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf'):
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ax.set_yscale('log')
+    ax.grid(which='both')
     for tagger in tagschema.get_taggers(in_file): 
         b_ds = in_file['B/btag/all/{}'.format(tagger)]
         u_ds = in_file['U/btag/all/{}'.format(tagger)]
