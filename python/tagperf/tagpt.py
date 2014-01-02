@@ -36,7 +36,7 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf'):
     ax.legend(numpoints=1, loc='upper left')
     ax.set_xlim(20, np.max(x_vals) * 1.1)
     ax.set_xlabel('$p_{\mathrm{T}}$ [GeV]', x=0.98, ha='right')
-    ax.set_ylabel(rej_label(rej_flavor, eff), y=0.98, va='top')
+    ax.set_ylabel(rej_label(rej_flavor, eff), y=0.98, ha='right')
     x_formatter = FuncFormatter(tick_format)
     ax.xaxis.set_minor_formatter(x_formatter)
     ax.xaxis.set_major_formatter(x_formatter)
@@ -107,7 +107,7 @@ def rej_label(rej_flavor, eff):
     return pt1 + pt2
 
 # ==== exceptions ====
-class RejectionCalcError(StandardError): 
+class RejectionCalcError(Exception): 
     def __init__(self, *args): 
         super(RejectionCalcError, self).__init__(*args)
 

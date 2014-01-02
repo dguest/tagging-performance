@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3.3
 
 import site
 from os.path import isfile, isdir, join, abspath, split
@@ -22,7 +22,8 @@ def add_path():
         pfile.write(here_path())
 
 def rm_path(): 
-    os.remove(pth_file_path())
+    if isfile(pth_file_path()): 
+        os.remove(pth_file_path())
     
 
 if __name__ == '__main__': 
