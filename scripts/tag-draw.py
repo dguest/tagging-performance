@@ -11,9 +11,12 @@ def run():
     parser.add_argument(
         '-o', '--out-dir', help='output dir (default %(default)s)', 
         default='plots')
+    parser.add_argument(
+        '-e', '--ext', help='plot extension (default %(default)s)', 
+        default='.pdf')
     args = parser.parse_args(sys.argv[1:])
-    tagroc.make_plots(args.hdf_file, args.out_dir)
-    tagpt.make_plots(args.hdf_file, args.out_dir)
+    tagroc.make_plots(args.hdf_file, args.out_dir, args.ext)
+    tagpt.make_plots(args.hdf_file, args.out_dir, args.ext)
 
 if __name__ == '__main__': 
     run()

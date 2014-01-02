@@ -8,11 +8,11 @@ from matplotlib.figure import Figure
 from os.path import isdir
 import os
 
-def make_plots(in_file_name, out_dir): 
+def make_plots(in_file_name, out_dir, ext): 
     with h5py.File(in_file_name, 'r') as in_file: 
-        draw_btag_roc(in_file, out_dir)
+        draw_btag_roc(in_file, out_dir, ext=ext)
 
-def draw_btag_roc(in_file, out_dir, min_eff=0.5): 
+def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf'): 
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
@@ -27,7 +27,7 @@ def draw_btag_roc(in_file, out_dir, min_eff=0.5):
         os.mkdir(out_dir)
     ax.legend()
     ax.set_xlim(min_eff, 1.0)
-    canvas.print_figure('{}/roc.pdf'.format(out_dir))
+    canvas.print_figure('{}/roc{}'.format(out_dir, ext))
 
 def _get_roc_xy(eff_ds, rej_ds): 
     eff_array = np.array(eff_ds)[::-1].cumsum()

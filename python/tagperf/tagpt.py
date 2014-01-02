@@ -11,14 +11,14 @@ import os, sys
 import math
 import warnings
 
-def make_plots(in_file_name, out_dir): 
+def make_plots(in_file_name, out_dir, ext): 
     with h5py.File(in_file_name, 'r') as in_file: 
         for eff in [0.6, 0.7, 0.8]: 
             for rej_flavor in 'UC': 
                 draw_pt_bins(in_file, out_dir, rej_flavor=rej_flavor, 
-                             eff=eff)
+                             eff=eff, ext=ext)
 
-def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U'): 
+def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf'): 
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
@@ -39,8 +39,8 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U'):
     x_formatter = FuncFormatter(tick_format)
     ax.xaxis.set_minor_formatter(x_formatter)
     ax.xaxis.set_major_formatter(x_formatter)
-    out_name = '{}/{}_rej{}_ptbins.pdf'.format(
-        out_dir, rej_flavor, int(eff*100))
+    out_name = '{}/{}_rej{}_ptbins{}'.format(
+        out_dir, rej_flavor, int(eff*100), ext)
     canvas.print_figure(out_name, bbox_inches='tight')
 
 def _check_round(eff, target, warn_tolerance=0.01, err_tolerance=0.1): 
