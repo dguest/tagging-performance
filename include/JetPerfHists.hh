@@ -28,12 +28,25 @@ public:
   void writeTo(H5::CommonFG&); 
 private: 
   Histogram* m_mv1; 
+  Histogram* m_mv1c; 
   Histogram* m_gaia_anti_light; 
   Histogram* m_gaia_anti_charm; 
   Histogram* m_gaia_gr1; 
   Histogram* m_mv2c00; 
   Histogram* m_mv2c10; 
   Histogram* m_mv2c20; 
+}; 
+
+class CtagHists { 
+public: 
+  CtagHists(); 
+  ~CtagHists(); 
+  CtagHists(CtagHists&) = delete; 
+  CtagHists& operator=(CtagHists&) = delete; 
+  void fill(const Jet&, double weight); 
+  void writeTo(H5::CommonFG&); 
+private: 
+  Histogram* m_gaia; 
 }; 
 
 class FlavoredHists { 
@@ -43,6 +56,7 @@ public:
   void writeTo(H5::CommonFG&); 
 private: 
   BtagHists m_btag; 
+  CtagHists m_ctag; 
   std::vector<BtagHists> m_pt_btag; 
   std::map<double, size_t> m_pt_bins; 
 }; 

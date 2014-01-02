@@ -41,3 +41,4 @@ int buildHists(std::vector<std::string> files, std::string out_name){
 
   return 0; 
 }
+
