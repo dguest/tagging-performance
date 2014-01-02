@@ -18,9 +18,8 @@ def add_path():
     usr_path = here_path()
     if not isdir(usr_path): 
         os.makedirs(usr_path)
-    if not isfile(pth_file): 
-        with open(pth_file,'w') as pfile: 
-            pfile.write(here_path())
+    with open(pth_file,'w') as pfile: 
+        pfile.write(here_path())
 
 def rm_path(): 
     os.remove(pth_file_path())
