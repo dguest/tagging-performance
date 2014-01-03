@@ -81,7 +81,8 @@ void BtagHists::writeTo(H5::CommonFG& fg) {
 // ======== charm tag hists ==============
 
 CtagHists::CtagHists() : 
-  m_gaia(0)
+  m_gaia(0), 
+  m_jfc(0)
 {
   using namespace hist; 
   unsigned hflag = hist::eat_nan; 
@@ -93,18 +94,22 @@ CtagHists::CtagHists() :
   Axis gaia_anti_u = gaia_axis; 
   gaia_anti_u.name = "antiU"; 
   m_gaia = new Histogram({gaia_anti_u, gaia_anti_b}, hflag); 
+  m_jfc = new Histogram({gaia_anti_u, gaia_anti_b}, hflag); 
 }
 
 CtagHists::~CtagHists() { 
   delete m_gaia; 
+  delete m_jfc; 
 }
 
 void CtagHists::fill(const Jet& jet, double weight) { 
   m_gaia->fill({ctagAntiU(jet.gaia), ctagAntiB(jet.gaia)}, weight); 
+  m_jfc->fill({ctagAntiU(jet.jfc), ctagAntiB(jet.jfc)}, weight); 
 }
 
 void CtagHists::writeTo(H5::CommonFG& fg) { 
   m_gaia->write_to(fg, "gaia"); 
+  m_jfc->write_to(fg, "jfc"); 
 }
 
 

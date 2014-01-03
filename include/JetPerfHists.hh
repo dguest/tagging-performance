@@ -47,6 +47,7 @@ public:
   void writeTo(H5::CommonFG&); 
 private: 
   Histogram* m_gaia; 
+  Histogram* m_jfc; 
 }; 
 
 class FlavoredHists { 

@@ -13,7 +13,8 @@ from matplotlib.colorbar import Colorbar
 def make_plots(in_file_name, cache_name, out_dir, ext): 
     with h5py.File(in_file_name, 'r') as in_file: 
         with h5py.File(cache_name, 'a') as out_file: 
-            make_rejrej(in_file, out_file)
+            make_rejrej(in_file, out_file, tagger='gaia')
+            make_rejrej(in_file, out_file, tagger='jfc')
 
     if not isdir(out_dir): 
         os.mkdir(out_dir)
@@ -21,6 +22,7 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
     with h5py.File(cache_name, 'r') as cache: 
         draw_ctag_rejrej(cache, out_dir, ext)
         draw_contour_rejrej(cache, out_dir, ext)
+        draw_ctag_ratio(cache, out_dir, ext)
 
 def _get_hist_name(flavor, tagger, binning): 
     return '{}/ctag/{}/{}'.format(flavor, binning, tagger)
@@ -149,15 +151,49 @@ def draw_ctag_rejrej(in_file, out_dir, ext='.pdf'):
         warnings.simplefilter("ignore")
         canvas.print_figure(out_name, bbox_inches='tight')
 
+def draw_ctag_ratio(in_file, out_dir, ext='.pdf'): 
+    fig = Figure(figsize=(8,6))
+    canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(1,1,1)
+    ds = in_file['gaia/all']
+    ds_denom = in_file['jfc/all']
+
+    eff_array, extent = _get_arr_extent(ds)
+    denom_array, denom_extent = _get_arr_extent(ds_denom)
+    ratio_array = eff_array / denom_array
+    im = ax.imshow(ratio_array.T, extent=extent, 
+                   origin='lower', aspect='auto', 
+                   vmin=1.0, vmax=1.4)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.grid(which='both')
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    cb = Colorbar(ax=cax, mappable=im)
+
+    _label_axes(ax, ds)
+    _add_eq_contour(ax, ds, ds_denom, colorbar=cb)
+    _add_contour(ax,ds)
+
+    out_name = '{}/rejrej-ratio{}'.format(out_dir, ext)
+    # ignore complaints about not being able to log scale images
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        canvas.print_figure(out_name, bbox_inches='tight')
+
+
 def draw_contour_rejrej(in_file, out_dir, ext='.pdf'): 
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ds = in_file['gaia/all']
+    ds_denom = in_file['jfc/all']
     
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.grid(which='both')
+    _add_eq_contour(ax, ds, ds_denom, levels=[1.05, 1.10, 1.15])
     _add_contour(ax, ds)
     _label_axes(ax, ds)
 
@@ -183,9 +219,35 @@ def _add_contour(ax, ds, opts={}):
         levels = c_lines,
         colors = opts.get('color','k'), 
         )
-    import matplotlib.pyplot as plt
     ax.clabel(ct, fontsize=12, inline=True, 
               fmt = '%.{}f'.format(-contour_order + 1 ))
+
+def _add_eq_contour(ax, ds, ds_denom, colorbar=None, levels=[]): 
+    eff_array = _maximize_efficiency(np.array(ds))
+    other_array = _maximize_efficiency(np.array(ds_denom))
+    ratio_array = eff_array / other_array
+    xmin = ds.attrs.get('x_min', 1.0)
+    ymin = ds.attrs.get('y_min', 1.0)
+    xmax = ds.attrs['x_max']
+    ymax = ds.attrs['y_max']
+
+    xvals = np.logspace(math.log10(xmin), math.log10(xmax), ds.shape[0])
+    yvals = np.logspace(math.log10(ymin), math.log10(ymax), ds.shape[1])
+    xgrid, ygrid = np.meshgrid(xvals, yvals)
+    ct = ax.contour(
+        xgrid, ygrid, 
+        ratio_array.T, 
+        linewidths = 2, 
+        levels = [1.0, 1.05, 1.1, 1.15] if not levels else levels,
+        colors = ['r','orange','y','green'], 
+        )
+    def fmt(value): 
+        if value == 1.0: 
+            return 'equal'
+        return '{:+.0%}'.format(value - 1.0)
+    ax.clabel(ct, fontsize=12, inline=True, fmt=fmt)
+    if colorbar: 
+        colorbar.add_lines(ct)
 
 def _label_axes(ax, ds): 
     x, y, z = ds.attrs['xyz']
