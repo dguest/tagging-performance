@@ -11,16 +11,19 @@
 #include <cmath> 
 #include <stdexcept> 
 
-int buildHists(std::vector<std::string> files, std::string out_name){ 
+int buildHists(std::vector<std::string> files, std::string out_name, 
+	       unsigned flags){ 
+  const bool test = (flags & jtag::test); 
   if (exists(out_name)) throw std::runtime_error(out_name + " exists"); 
 
   TreeBuffer buffer(files); 
-
   JetPerfHists hists; 
 
-  const int n_events = std::min(int(std::pow(10,6)), buffer.size()); 
+  int test_events = std::min(int(100), buffer.size()); 
+  const int n_events = test ? test_events: buffer.size(); 
   int total_jets = 0; 
   int error_jets = 0; 
+  if (test) printf("starting loop on %i events\n", n_events); 
   for (int event = 0; event < n_events; event++) { 
     buffer.getEntry(event); 
     const int n_jets = buffer.jet_pt->size(); 
@@ -31,6 +34,7 @@ int buildHists(std::vector<std::string> files, std::string out_name){
       hists.fill(jet, 1.0); 
     }
   }
+  if (test) printf("done event loop, saving\n"); 
   
   H5::H5File out_file(out_name, H5F_ACC_EXCL); 
   hists.writeTo(out_file); 
