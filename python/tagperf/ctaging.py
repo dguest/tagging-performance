@@ -15,6 +15,7 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         with h5py.File(cache_name, 'a') as out_file: 
             make_rejrej(in_file, out_file, tagger='gaia')
             make_rejrej(in_file, out_file, tagger='jfc')
+            make_rejrej(in_file, out_file, tagger='jfit')
 
     if not isdir(out_dir): 
         os.mkdir(out_dir)
@@ -23,6 +24,8 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         draw_ctag_rejrej(cache, out_dir, ext)
         draw_contour_rejrej(cache, out_dir, ext)
         draw_ctag_ratio(cache, out_dir, ext)
+        draw_ctag_ratio(cache, out_dir, ext, tagger='jfit', 
+                        tagger_disp='COMBNN', vmax=1.9)
         draw_simple_rejrej(cache, out_dir, ext)
 
 def _get_hist_name(flavor, tagger, binning): 
@@ -159,19 +162,31 @@ def draw_ctag_rejrej(in_file, out_dir, ext='.pdf'):
         warnings.simplefilter("ignore")
         canvas.print_figure(out_name, bbox_inches='tight')
 
-def draw_ctag_ratio(in_file, out_dir, ext='.pdf'): 
+def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts): 
+    """
+    misc options: 
+      tagger
+      tagger_disp (for display)
+      vmax
+    """
+    options = {'tagger':'jfc', 'tagger_disp':'JetFitterCharm', 'vmax':1.2}
+    for key, val in opts.items(): 
+        if not key in options: 
+            raise TypeError("{} not a valid arg".format(key))
+        options[key] = val
+
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ds = in_file['gaia/all']
-    ds_denom = in_file['jfc/all']
+    ds_denom = in_file['{}/all'.format(options['tagger'])]
 
     eff_array, extent = _get_arr_extent(ds)
     denom_array, denom_extent = _get_arr_extent(ds_denom)
     ratio_array = eff_array / denom_array
     im = ax.imshow(ratio_array.T, extent=extent, 
                    origin='lower', aspect='auto', 
-                   vmin=1.0, vmax=1.20)
+                   vmin=1.0, vmax=options['vmax'])
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.grid(which='both')
@@ -179,13 +194,15 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf'):
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cb = Colorbar(ax=cax, mappable=im)
-    cb.set_label('$\epsilon_{c}$ ratio (GAIA / JetFitterCharm)')
+    cb.set_label('$\epsilon_{{c}}$ ratio (GAIA / {})'.format(
+            options['tagger_disp']))
 
     _label_axes(ax, ds)
     _add_eq_contour(ax, ds, ds_denom, colorbar=cb)
     _add_contour(ax,ds)
 
-    out_name = '{}/rejrej-ratio{}'.format(out_dir, ext)
+    out_name = '{}/rejrej-ratio-{}{}'.format(
+        out_dir, options['tagger'], ext)
     # ignore complaints about not being able to log scale images
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -236,16 +253,14 @@ def _add_contour(ax, ds, opts={}):
     xvals = np.logspace(math.log10(xmin), math.log10(xmax), ds.shape[0])
     yvals = np.logspace(math.log10(ymin), math.log10(ymax), ds.shape[1])
     xgrid, ygrid = np.meshgrid(xvals, yvals)
-    contour_order, c_lines = _get_contour_order_and_lines(
-        opts.get('zrange',[0.05,0.65]))
+    c_lines = np.arange(0.1, 0.65, 0.05)
     ct = ax.contour(xgrid, ygrid, 
         eff_array.T, 
         linewidths = 2, 
         levels = opts.get('levels',c_lines),
         colors = opts.get('color','k'), 
         )
-    ax.clabel(ct, fontsize=12, inline=True, 
-              fmt = '%.{}f'.format(-contour_order + 1 ))
+    ax.clabel(ct, fontsize=12, inline=True, fmt = '%.2f')
 
 def _smooth(ratio_array, sigma): 
     if not sigma: 
@@ -307,39 +322,3 @@ def _maximize_efficiency(eff_array):
     temp = np.maximum.accumulate(eff_array[::-1,:], 0)[::-1,:]
     temp = np.maximum.accumulate(temp[:,::-1], 1)[:,::-1]
     return temp
-
-def _get_contour_order_and_lines(z_range): 
-    """
-    returns (order, lines), where order is an int, lines an array
-
-    we want somewhere between 6 and 15 contour lines in z_range, 
-    there's a messy way to do this, and it's not worth thinking about the 
-    cleaner way
-    """
-
-    z_min = min(z_range)
-    z_max = max(z_range)
-    contour_range = z_max - z_min
-    contour_order = math.trunc(math.log10(contour_range)) - 1
-    
-    c_min = round(z_min,-contour_order)
-    c_max = round(z_max,-contour_order)
-    round_range = c_max - c_min
-
-    base_increment = 10**contour_order
-    n_increments = round_range / base_increment
-    
-    if n_increments > 40: 
-        base_increment *= 5
-    elif n_increments > 15: 
-        base_increment *= 2
-    elif n_increments < 6: 
-        base_increment *= 0.5
-
-    n_increments = round_range / base_increment
-
-    the_lines = np.arange(c_min, c_max, base_increment)
-    
-    subset_in_range = (the_lines >= z_min) & (the_lines < z_max)
-    return contour_order, the_lines[ subset_in_range]
-

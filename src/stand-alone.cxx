@@ -18,7 +18,7 @@ int main(int narg, char* argv[]) {
     exit(1); 
   }
   std::vector<std::string> files; 
-  unsigned flags; 
+  unsigned flags = 0; 
   for (int pos = 1; pos < narg; pos++) { 
     if (argv[pos][0] == '-') { 
       if (strchr(argv[pos],'t')) flags |= jtag::test; 
