@@ -14,11 +14,11 @@ def pth_file_path():
     return pth_file
 
 def add_path(): 
-    pth_file = pth_file_path()
+    pth_file_dir, pth_file = split(pth_file_path())
     usr_path = here_path()
-    if not isdir(usr_path): 
-        os.makedirs(usr_path)
-    with open(pth_file,'w') as pfile: 
+    if not isdir(pth_file_dir): 
+        os.makedirs(pth_file_dir)
+    with open(join(pth_file_dir,pth_file),'w') as pfile: 
         pfile.write(here_path())
 
 def rm_path(): 
