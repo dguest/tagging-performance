@@ -2,9 +2,6 @@
 
 import argparse
 import sys
-from tagperf import tagroc
-from tagperf import tagpt
-from tagperf import ctaging
 
 def run(): 
     parser = argparse.ArgumentParser()
@@ -18,14 +15,14 @@ def run():
 
     fdict = {f.name: f for f in [ctag, roc, pt]}
     parser.add_argument(
-        '-p', '--plots', help='plots to make (default %(default)s', 
+        '-p', '--plots', help='plots to make (default %(default)s)', 
         choices=fdict.keys(), default='all')
     args = parser.parse_args(sys.argv[1:])
     
     if args.plots == 'all': 
         plots = fdict.keys()
     else: 
-        plots = args.plots
+        plots = [args.plots]
     for plt in plots: 
         fdict[plt](args)
 
@@ -37,17 +34,20 @@ def name(name):
 
 @name('ctag')
 def ctag(args): 
+    from tagperf import ctaging
     print('making ctag plots')
     ctaging.make_plots(args.hdf_file, 'REJREJ_CACHE.h5', args.out_dir, 
                         args.ext)
 
 @name('roc')
 def roc(args): 
+    from tagperf import tagroc
     print('making roc plots')
     tagroc.make_plots(args.hdf_file, args.out_dir, args.ext)
 
 @name('pt')
 def pt(args): 
+    from tagperf import tagpt
     print('making pt plots')
     tagpt.make_plots(args.hdf_file, args.out_dir, args.ext)
 

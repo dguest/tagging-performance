@@ -23,6 +23,7 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         draw_ctag_rejrej(cache, out_dir, ext)
         draw_contour_rejrej(cache, out_dir, ext)
         draw_ctag_ratio(cache, out_dir, ext)
+        draw_simple_rejrej(cache, out_dir, ext)
 
 def _get_hist_name(flavor, tagger, binning): 
     return '{}/ctag/{}/{}'.format(flavor, binning, tagger)
@@ -53,6 +54,8 @@ def make_rejrej(in_file, out_file, tagger='gaia', binning='all'):
         flav: make_int_flavor(flav) for flav in 'BCU'}
     
     rej_builder = RejRejComp()
+    rej_builder.x_max = 50.0
+    rej_builder.y_max = 400.0
     rej_array = rej_builder.get_rej_array(
         eff=_get_eff_hist(int_flavor_arrays['C']), 
         xrej=_get_rej_hist(int_flavor_arrays['B']), 
@@ -168,7 +171,7 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf'):
     ratio_array = eff_array / denom_array
     im = ax.imshow(ratio_array.T, extent=extent, 
                    origin='lower', aspect='auto', 
-                   vmin=1.0, vmax=1.4)
+                   vmin=1.0, vmax=1.20)
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.grid(which='both')
@@ -188,7 +191,6 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf'):
         warnings.simplefilter("ignore")
         canvas.print_figure(out_name, bbox_inches='tight')
 
-
 def draw_contour_rejrej(in_file, out_dir, ext='.pdf'): 
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
@@ -199,11 +201,27 @@ def draw_contour_rejrej(in_file, out_dir, ext='.pdf'):
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.grid(which='both')
-    _add_eq_contour(ax, ds, ds_denom, levels=[1.05, 1.10, 1.15])
+    _add_eq_contour(ax, ds, ds_denom, levels=[1.05, 1.10, 1.15], smooth=1.0)
     _add_contour(ax, ds)
     _label_axes(ax, ds)
 
     out_name = '{}/rejrej-cont{}'.format(out_dir, ext)
+    canvas.print_figure(out_name, bbox_inches='tight')
+
+def draw_simple_rejrej(in_file, out_dir, ext='.pdf'): 
+    fig = Figure(figsize=(8,6))
+    canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(1,1,1)
+    ds = in_file['gaia/all']
+    ds_denom = in_file['jfc/all']
+    
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.grid(which='both')
+    _add_contour(ax, ds, opts=dict(levels=np.arange(0.1, 0.8, 0.05)))
+    _label_axes(ax, ds)
+
+    out_name = '{}/rejrej-simple{}'.format(out_dir, ext)
     canvas.print_figure(out_name, bbox_inches='tight')
 
 # =========== draw utilities ===========
@@ -218,20 +236,32 @@ def _add_contour(ax, ds, opts={}):
     xvals = np.logspace(math.log10(xmin), math.log10(xmax), ds.shape[0])
     yvals = np.logspace(math.log10(ymin), math.log10(ymax), ds.shape[1])
     xgrid, ygrid = np.meshgrid(xvals, yvals)
-    contour_order, c_lines = _get_contour_order_and_lines([0,0.5])
+    contour_order, c_lines = _get_contour_order_and_lines(
+        opts.get('zrange',[0.05,0.65]))
     ct = ax.contour(xgrid, ygrid, 
         eff_array.T, 
         linewidths = 2, 
-        levels = c_lines,
+        levels = opts.get('levels',c_lines),
         colors = opts.get('color','k'), 
         )
     ax.clabel(ct, fontsize=12, inline=True, 
               fmt = '%.{}f'.format(-contour_order + 1 ))
 
-def _add_eq_contour(ax, ds, ds_denom, colorbar=None, levels=[]): 
+def _smooth(ratio_array, sigma): 
+    if not sigma: 
+        return ratio_array
+    try: 
+        from scipy.ndimage.filters import gaussian_filter
+        ratio_array = gaussian_filter(ratio_array, sigma=sigma)
+    except ImportError as err: 
+        warnings.warn(
+            'problem with scipy: {}, not smoothing'.format(err), stacklevel=2)
+    return ratio_array
+
+def _add_eq_contour(ax, ds, ds_denom, colorbar=None, levels=[], smooth=None): 
     eff_array = _maximize_efficiency(np.array(ds))
     other_array = _maximize_efficiency(np.array(ds_denom))
-    ratio_array = eff_array / other_array
+    ratio_array = _smooth(eff_array / other_array, sigma=smooth)
     xmin = ds.attrs.get('x_min', 1.0)
     ymin = ds.attrs.get('y_min', 1.0)
     xmax = ds.attrs['x_max']
