@@ -70,6 +70,7 @@ void BtagHists::fill(const Jet& jet, double weight) {
 
 void BtagHists::writeTo(H5::CommonFG& fg) { 
   m_mv1->write_to(fg, "mv1"); 
+  m_mv1c->write_to(fg, "mv1c"); 
   m_gaia_anti_light->write_to(fg, "gaiaAntiU"); 
   m_gaia_anti_charm->write_to(fg, "gaiaAntiC"); 
   m_gaia_gr1->write_to(fg, "gaiaGr1"); 
