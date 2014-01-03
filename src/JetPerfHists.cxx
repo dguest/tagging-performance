@@ -82,7 +82,8 @@ void BtagHists::writeTo(H5::CommonFG& fg) {
 
 CtagHists::CtagHists() : 
   m_gaia(0), 
-  m_jfc(0)
+  m_jfc(0), 
+  m_jfit(0)
 {
   using namespace hist; 
   unsigned hflag = hist::eat_nan; 
@@ -95,21 +96,25 @@ CtagHists::CtagHists() :
   gaia_anti_u.name = "antiU"; 
   m_gaia = new Histogram({gaia_anti_u, gaia_anti_b}, hflag); 
   m_jfc = new Histogram({gaia_anti_u, gaia_anti_b}, hflag); 
+  m_jfit = new Histogram({gaia_anti_u, gaia_anti_b}, hflag); 
 }
 
 CtagHists::~CtagHists() { 
   delete m_gaia; 
   delete m_jfc; 
+  delete m_jfit; 
 }
 
 void CtagHists::fill(const Jet& jet, double weight) { 
   m_gaia->fill({ctagAntiU(jet.gaia), ctagAntiB(jet.gaia)}, weight); 
   m_jfc->fill({ctagAntiU(jet.jfc), ctagAntiB(jet.jfc)}, weight); 
+  m_jfit->fill({ctagAntiU(jet.jfit), ctagAntiB(jet.jfit)}, weight); 
 }
 
 void CtagHists::writeTo(H5::CommonFG& fg) { 
   m_gaia->write_to(fg, "gaia"); 
   m_jfc->write_to(fg, "jfc"); 
+  m_jfit->write_to(fg, "jfit"); 
 }
 
 

@@ -48,6 +48,7 @@ public:
 private: 
   Histogram* m_gaia; 
   Histogram* m_jfc; 
+  Histogram* m_jfit; 
 }; 
 
 class FlavoredHists { 
