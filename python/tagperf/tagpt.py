@@ -12,6 +12,8 @@ import math
 import warnings
 
 def make_plots(in_file_name, out_dir, ext): 
+    if not isdir(out_dir): 
+        os.mkdir(out_dir)
     with h5py.File(in_file_name, 'r') as in_file: 
         for eff in [0.6, 0.7, 0.8]: 
             for rej_flavor in 'UC': 

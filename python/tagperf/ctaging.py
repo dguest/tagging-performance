@@ -64,15 +64,20 @@ def make_rejrej(in_file, out_file, tagger='gaia', binning='all'):
     saved_ds.attrs['xyz'] = 'BUC'
 
 class ProgBar: 
-    def __init__(self, total): 
+    def __init__(self, total, prefix=''): 
         self.total = total
+        self.prefix = prefix
     def __enter__(self): 
         return self
     def __exit__(self, ex_type, ex_message, tr): 
         sys.stdout.write('\n')
-    def update(self, entry): 
-        sys.stdout.write('\r{} of {} ({:.0%})'.format(
-                entry, self.total, entry / self.total))
+    def update(self, entry):
+        if self.prefix: 
+            outstr = '\r{prefix}: {} of {} ({:.0%})'
+        else: 
+            outstr = '\r{} of {} ({:.0%})'
+        sys.stdout.write(outstr.format(
+                entry, self.total, entry / self.total, prefix=self.prefix))
         sys.stdout.flush()
     
 class RejRejComp: 
@@ -91,9 +96,9 @@ class RejRejComp:
         z_vals = eff[valid_rej]
         
         out_array = np.ones((self.n_bins, self.n_bins)) * -1
-        with ProgBar(z_vals.size) as pbar: 
+        with ProgBar(z_vals.size, 'making rejrej') as pbar: 
             for binn, (x, y, z) in enumerate(zip(x_bins, y_bins, z_vals)): 
-                if binn % 10000 == 0: 
+                if binn % 20000 == 0: 
                     pbar.update(binn)
                 out_array[x, y] = max(z, out_array[x, y])
         return out_array
@@ -171,6 +176,7 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf'):
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cb = Colorbar(ax=cax, mappable=im)
+    cb.set_label('$\epsilon_{c}$ ratio (GAIA / JetFitterCharm)')
 
     _label_axes(ax, ds)
     _add_eq_contour(ax, ds, ds_denom, colorbar=cb)
@@ -238,7 +244,7 @@ def _add_eq_contour(ax, ds, ds_denom, colorbar=None, levels=[]):
         xgrid, ygrid, 
         ratio_array.T, 
         linewidths = 2, 
-        levels = [1.0, 1.05, 1.1, 1.15] if not levels else levels,
+        levels = [1.0] if not levels else levels,
         colors = ['r','orange','y','green'], 
         )
     def fmt(value): 

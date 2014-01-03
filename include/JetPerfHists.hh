@@ -13,7 +13,7 @@ namespace H5 {
 
 namespace hist { 
   const int N_BINS = 10000; 
-  const int N_2AX_BINS = 1000; 
+  const int N_2AX_BINS = 2000; 
   const double GAIA_LOW = -10.0; 
   const double GAIA_HIGH = 10.0; 
 }
