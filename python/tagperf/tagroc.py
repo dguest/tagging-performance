@@ -23,7 +23,9 @@ def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf'):
         u_ds = in_file['U/btag/all/{}'.format(tagger)]
         x_pts, y_pts = _get_roc_xy(eff_ds=b_ds, rej_ds=u_ds)
         valid_eff = x_pts > min_eff
-        ax.plot(x_pts[valid_eff], y_pts[valid_eff], '-', label=tagger)
+        with tagschema.ColorScheme('colors.yml') as colors: 
+            ax.plot(x_pts[valid_eff], y_pts[valid_eff], '-', label=tagger, 
+                    color=colors[tagger])
     if not isdir(out_dir): 
         os.mkdir(out_dir)
     ax.legend()

@@ -32,9 +32,10 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf'):
         rej_group = in_file['{}/btag/ptBins'.format(rej_flavor)]
         x_vals, y_vals, x_err, y_err = _get_pt_xy(
             eff_group, rej_group, pt_bins, eff, tagger=tagger)
-        ax.errorbar(
-            x_vals, y_vals, label=tagger, #xerr=x_err, 
-            yerr=y_err)
+        with tagschema.ColorScheme('colors.yml') as colors: 
+            ax.errorbar(
+                x_vals, y_vals, label=tagger, #xerr=x_err, 
+                yerr=y_err, color=colors[tagger])
     ax.legend(numpoints=1, loc='upper left')
     ax.set_xlim(20, np.max(x_vals) * 1.1)
     ax.set_xlabel('$p_{\mathrm{T}}$ [GeV]', x=0.98, ha='right')
