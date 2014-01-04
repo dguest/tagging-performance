@@ -123,7 +123,7 @@ $(BIN)/%.o: %.cxx
 	@$(CXX) -c $(CXXFLAGS) $< -o $@
 
 # root dictionary generation 
-$(DICT)/%Dict.cxx: %.h LinkDef.hh
+$(DICT)/%Dict.cxx: %.h LinkDef.h
 	@echo making dict $@
 	@mkdir -p $(DICT)
 	@rm -f $(DICT)/$*Dict.h $(DICT)/$*Dict.cxx 
