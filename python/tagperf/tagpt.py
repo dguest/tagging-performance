@@ -81,6 +81,11 @@ def _get_pt_xy(eff_group, rej_group, pt_bins, eff, tagger):
     return x_vals, y_vals, x_err, y_err
 
 def _get_rejection(eff_array, rej_counts, eff): 
+    eff_max = eff_array.max()
+    if np.isnan(eff_max): 
+        raise RejectionCalcError("nan in efficiency array")
+    if eff_max == 0.0: 
+        raise RejectionCalcError("max efficiency is zero")
     eff_array /= eff_array.max()
     idx_above_eff, = np.nonzero(eff_array > eff)
     first_idx_above = idx_above_eff.min()
