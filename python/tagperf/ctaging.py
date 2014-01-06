@@ -9,6 +9,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.colorbar import Colorbar
+from matplotlib.ticker import FuncFormatter
+from matplotlib.lines import Line2D
 
 def make_plots(in_file_name, cache_name, out_dir, ext): 
     with h5py.File(in_file_name, 'r') as in_file: 
@@ -21,12 +23,14 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         os.mkdir(out_dir)
 
     with h5py.File(cache_name, 'r') as cache: 
-        draw_ctag_rejrej(cache, out_dir, ext)
-        draw_contour_rejrej(cache, out_dir, ext)
-        draw_ctag_ratio(cache, out_dir, ext)
-        draw_ctag_ratio(cache, out_dir, ext, tagger='jfit', 
-                        tagger_disp='COMBNN', vmax=1.9)
-        draw_simple_rejrej(cache, out_dir, ext)
+        # draw_ctag_rejrej(cache, out_dir, ext)
+        # draw_contour_rejrej(cache, out_dir, ext)
+        # draw_ctag_ratio(cache, out_dir, ext)
+        # draw_ctag_ratio(cache, out_dir, ext, tagger='jfit', 
+        #                 tagger_disp='COMBNN', vmax=1.9)
+        # draw_simple_rejrej(cache, out_dir, ext)
+        with h5py.File(in_file_name, 'r') as in_file: 
+            draw_cprob_rejrej(cache, in_file, out_dir, ext)
 
 def _get_hist_name(flavor, tagger, binning): 
     return '{}/ctag/{}/{}'.format(flavor, binning, tagger)
@@ -241,7 +245,55 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf'):
     out_name = '{}/rejrej-simple{}'.format(out_dir, ext)
     canvas.print_figure(out_name, bbox_inches='tight')
 
+def draw_cprob_rejrej(in_file, in_file_up, out_dir, ext='.pdf'): 
+    fig = Figure(figsize=(8,6))
+    canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(1,1,1)
+    ds = in_file['gaia/all']
+    ds_denom = in_file['jfc/all']
+    
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.grid(which='both')
+    levels = np.arange(0.1, 0.8, 0.1)
+    _add_contour(ax, ds, opts=dict(levels=levels))
+    _add_cprob_curve(ax, in_file_up, levels=levels)
+    _label_axes(ax, ds)
+
+    out_name = '{}/rejrej-cprob{}'.format(out_dir, ext)
+    canvas.print_figure(out_name, bbox_inches='tight')
+
 # =========== draw utilities ===========
+
+def _add_cprob_curve(ax, in_file, levels): 
+    def getint(flavor): 
+        name = '{}/ctag/all/gaiaC'.format(flavor)
+        return np.array(in_file[name])[::-1].cumsum()
+    c_int = getint('C')
+    b_int = getint('B')
+    u_int = getint('U')
+
+    c_eff_all = c_int / c_int.max()
+    useful_eff = c_eff_all > 0.2
+    c_eff = c_eff_all[useful_eff]
+    b_rej = b_int.max() / b_int[useful_eff]
+    u_rej = u_int.max() / u_int[useful_eff]
+    ax.plot(b_rej, u_rej, '--r', linewidth=2, label='gaia 1D $p_{c}$')
+    b_rej_pts = []
+    u_rej_pts = []
+    for eff in levels: 
+        idx_above, *throw_away = np.nonzero(c_eff > eff)
+        first_above = idx_above.min()
+        b_pt = b_rej[first_above]
+        b_rej_pts.append(b_pt)
+        u_pt = u_rej[first_above]
+        u_rej_pts.append(u_pt)
+        ax.text(b_pt, u_pt, str(eff), color='r', ha='left', va='bottom')
+    ax.plot(b_rej_pts, u_rej_pts, 'or')
+    handles, labels = ax.get_legend_handles_labels()
+    handles.append(Line2D([0,1],[0,0], linewidth=2, color='k'))
+    labels.append('gaia 2D, iso-eff')
+    ax.legend(reversed(handles), reversed(labels), numpoints=1)
 
 def _add_contour(ax, ds, opts={}): 
     eff_array = _maximize_efficiency(np.array(ds))
@@ -259,6 +311,7 @@ def _add_contour(ax, ds, opts={}):
         linewidths = 2, 
         levels = opts.get('levels',c_lines),
         colors = opts.get('color','k'), 
+        label = 'iso-eff 2D cuts'
         )
     ax.clabel(ct, fontsize=12, inline=True, fmt = '%.2f')
 
@@ -300,8 +353,20 @@ def _add_eq_contour(ax, ds, ds_denom, colorbar=None, levels=[], smooth=None):
     if colorbar: 
         colorbar.add_lines(ct)
 
+def _tick_format(x, pos): 
+    base = math.floor(math.log10(x)) 
+    if x / 10**base > 5: 
+        return ''
+    else:
+        return '{:.0f}'.format(x)
+
 def _label_axes(ax, ds): 
     x, y, z = ds.attrs['xyz']
+    formatter = FuncFormatter(_tick_format)
+    ax.xaxis.set_minor_formatter(formatter)
+    ax.xaxis.set_major_formatter(formatter)
+    ax.yaxis.set_minor_formatter(formatter)
+    ax.yaxis.set_major_formatter(formatter)
     ax.set_xlabel('$1 / \epsilon_{{ {} }}$'.format(x.lower()), 
                   x=0.98, ha='right')
     ax.set_ylabel('$1 / \epsilon_{{ {} }}$'.format(y.lower()), 
