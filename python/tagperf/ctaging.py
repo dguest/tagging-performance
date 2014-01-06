@@ -23,12 +23,12 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         os.mkdir(out_dir)
 
     with h5py.File(cache_name, 'r') as cache: 
-        # draw_ctag_rejrej(cache, out_dir, ext)
-        # draw_contour_rejrej(cache, out_dir, ext)
-        # draw_ctag_ratio(cache, out_dir, ext)
-        # draw_ctag_ratio(cache, out_dir, ext, tagger='jfit', 
-        #                 tagger_disp='COMBNN', vmax=1.9)
-        # draw_simple_rejrej(cache, out_dir, ext)
+        draw_ctag_rejrej(cache, out_dir, ext)
+        draw_contour_rejrej(cache, out_dir, ext)
+        draw_ctag_ratio(cache, out_dir, ext)
+        draw_ctag_ratio(cache, out_dir, ext, tagger='jfit', 
+                        tagger_disp='COMBNN', vmax=1.9)
+        draw_simple_rejrej(cache, out_dir, ext)
         with h5py.File(in_file_name, 'r') as in_file: 
             draw_cprob_rejrej(cache, in_file, out_dir, ext)
 
