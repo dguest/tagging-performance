@@ -30,6 +30,8 @@ def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf'):
         os.mkdir(out_dir)
     ax.legend()
     ax.set_xlim(min_eff, 1.0)
+    ax.set_xlabel('$\epsilon_{b}$', x=0.98, ha='right')
+    ax.set_ylabel('$1/\epsilon_{u}$', y=0.98, ha='right')
     canvas.print_figure('{}/roc{}'.format(out_dir, ext))
 
 def _get_roc_xy(eff_ds, rej_ds): 
