@@ -1,16 +1,13 @@
 try: 
     import yaml
 except ImportError: 
-    import json
-    class YamlLike: 
+    import json as yaml
+    def dump_proxy(obj, **args): 
         """
-        Class to fill in for yaml (in case it's not installed)
+        monkey patch json to look like yaml
         """
-        def load(self, fi): 
-            return json.load(fi)
-        def dump(self, obj, **args): 
-            return json.dumps(obj)
-    yaml = YamlLike()
+        return yaml.dumps(obj)
+    yaml.dump = dump_proxy
 
 from os.path import isfile
 
