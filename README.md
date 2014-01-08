@@ -8,10 +8,10 @@ This package requires [ROOT][0] to read ATLAS data. Fortunately the use is minim
 
 Unfortunately there are a few other dependencies. The upshot is that these packages are fairly standard for python data analysis, and thus quite easy to use. They are generally installed using something like `python3.3 setup.py install`.  
 
-- [Python 3.3][1] is used throughout
+- [Python 3.3][1] is used throughout (when installing from source, use `--enable-shared`)
 - [Numpy][4] 
 - HDF5 is used for binary data storage: 
- + [HDF5][2] basic library 
+ + [HDF5][2] basic library (be sure to install with `--enable-cxx`)
  + [h5py][3] for python bindings
 - [matplotlib][7] for plotting 
 
