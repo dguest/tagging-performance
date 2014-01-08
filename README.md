@@ -13,9 +13,12 @@ Unfortunately there are a few other dependencies. The upshot is that these packa
 - HDF5 is used for binary data storage: 
  + [HDF5][2] basic library 
  + [h5py][3] for python bindings
-- [pyyaml][5] for [yaml][6]
 - [matplotlib][7] for plotting 
-- [scipy][8] for various functions (currently not required)
+
+Optional: 
+
+- [scipy][8] for various functions (that can be disabled)
+- [pyyaml][5] for [yaml][6] (if not installed use json instead)
 
 [0]: http://root.cern.ch/drupal/content/downloading-root
 [1]: http://www.python.org/getit/

@@ -1,4 +1,17 @@
-import yaml
+try: 
+    import yaml
+except ImportError: 
+    import json
+    class YamlLike: 
+        """
+        Class to fill in for yaml (in case it's not installed)
+        """
+        def load(self, fi): 
+            return json.load(fi)
+        def dump(self, obj, **args): 
+            return json.dumps(obj)
+    yaml = YamlLike()
+
 from os.path import isfile
 
 class ColorScheme(dict): 
