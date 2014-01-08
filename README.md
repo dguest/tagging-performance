@@ -4,7 +4,7 @@ This is to test things and compare jet tagger performance.
 
 ## Required Packages 
 
-This package (grudgingly) requires [ROOT][0] to read ATLAS data. Fortunately the use is minimal: no fancy PyROOT or Roofit installation required. 
+This package requires [ROOT][0] to read ATLAS data. Fortunately the use is minimal: no fancy PyROOT or Roofit installation required. 
 
 Unfortunately there are a few other dependencies. The upshot is that these packages are fairly standard for python data analysis, and thus quite easy to use. They are generally installed using something like `python3.3 setup.py install`.  
 
