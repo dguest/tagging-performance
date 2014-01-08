@@ -29,7 +29,7 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf'):
     for tagger in tagschema.get_taggers(in_file): 
         pt_bins = tagschema.get_pt_bins(in_file['B/btag/ptBins'])
         eff_group = in_file['B/btag/ptBins']
-        rej_group = in_file['{}/btag/ptBins'.format(rej_flavor)]
+        rej_group = in_file['{}/btag/ptBins'.format(rej_flavor.upper())]
         x_vals, y_vals, x_err, y_err = _get_pt_xy(
             eff_group, rej_group, pt_bins, eff, tagger=tagger)
         with tagschema.ColorScheme('colors.yml') as colors: 
@@ -43,8 +43,8 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf'):
     x_formatter = FuncFormatter(tick_format)
     ax.xaxis.set_minor_formatter(x_formatter)
     ax.xaxis.set_major_formatter(x_formatter)
-    out_name = '{}/{}_rej{}_ptbins{}'.format(
-        out_dir, rej_flavor, int(eff*100), ext)
+    out_name = '{}/{}Rej{}_ptbins{}'.format(
+        out_dir, rej_flavor.lower(), int(eff*100), ext)
     canvas.print_figure(out_name, bbox_inches='tight')
 
 def _check_round(eff, target, warn_tolerance=0.01, err_tolerance=0.1): 
@@ -110,7 +110,7 @@ def tick_format(x, pos):
         return '{:.0f}'.format(x)
 
 def rej_label(rej_flavor, eff): 
-    pt1 = '$1/\epsilon_{{ \mathrm{{ {} }} }}$'.format(rej_flavor)
+    pt1 = '$1/\epsilon_{{ \mathrm{{ {} }} }}$'.format(rej_flavor.lower())
     pt2 = ' (fixed $\epsilon_{{b}}$ = {})'.format(eff)
     return pt1 + pt2
 
