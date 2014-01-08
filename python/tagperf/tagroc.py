@@ -44,6 +44,7 @@ def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf',
 
     _setup_ax(ax)
     _setup_ratio(ra)
+    ra.set_ylabel('X / {}'.format(baseline))
 
     taggers = tagschema.get_taggers(in_file)
     base_x = None
