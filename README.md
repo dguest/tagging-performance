@@ -1,10 +1,12 @@
 # Jet Tagging Performance Plots
 
-This is to test things. 
+This is to test things and compare jet tagger performance. 
 
 ## Required Packages 
 
-Unfortunately there are a few dependencies. The upshot is that these packages are fairly standard for python data analysis, and thus quite easy to use. They are generally installed using something like `python3.3 setup.py install`.  
+This package (grudgingly) requires [ROOT][0] to read ATLAS data. Fortunately the use is minimal: no fancy PyROOT or Roofit installation required. 
+
+Unfortunately there are a few other dependencies. The upshot is that these packages are fairly standard for python data analysis, and thus quite easy to use. They are generally installed using something like `python3.3 setup.py install`.  
 
 - [Python 3.3][1] is used throughout
 - [Numpy][4] 
@@ -15,7 +17,7 @@ Unfortunately there are a few dependencies. The upshot is that these packages ar
 - [matplotlib][7] for plotting 
 - [scipy][8] for various functions (currently not required)
 
-
+[0]: http://root.cern.ch/drupal/content/downloading-root
 [1]: http://www.python.org/getit/
 [2]: http://www.hdfgroup.org/HDF5/release/obtainsrc.html
 [3]: http://www.h5py.org/

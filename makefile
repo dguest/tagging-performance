@@ -33,12 +33,12 @@ ND_HIST_LIB      := $(ND_HIST)/lib
 # --- load in root config
 ROOTCFLAGS    := $(shell root-config --cflags)
 ROOTLIBS      := -L$(shell root-config --libdir)
-ROOTLIBS      += -lCore -lTree -lPhysics -lRIO 
+ROOTLIBS      += -lCore -lTree -lRIO 
 ROOTLIBS      += -lCint		# don't know why we need this...
 ROOTLDFLAGS   := $(shell root-config --ldflags)
 
 # and py config
-PY_CONFIG := python2.7-config
+PY_CONFIG := python3.3-config
 
 PY_FLAGS :=   $(shell $(PY_CONFIG) --includes)
 PY_LIB   := -L$(shell $(PY_CONFIG) --prefix)/lib
