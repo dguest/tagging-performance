@@ -29,6 +29,7 @@ public:
 private: 
   Histogram* m_mv1; 
   Histogram* m_mv1c; 
+  Histogram* m_mvb; 
   Histogram* m_gaia_anti_light; 
   Histogram* m_gaia_anti_charm; 
   Histogram* m_gaia_gr1; 

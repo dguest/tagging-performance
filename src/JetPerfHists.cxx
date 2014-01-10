@@ -24,6 +24,7 @@ namespace {
 BtagHists::BtagHists() : 
   m_mv1(0), 
   m_mv1c(0), 
+  m_mvb(0), 
   m_gaia_anti_light(0), 
   m_gaia_anti_charm(0), 
   m_gaia_gr1(0), 
@@ -38,6 +39,7 @@ BtagHists::BtagHists() :
   const Axis gaia_axis = {"x", N_BINS, GAIA_LOW, GAIA_HIGH, ""}; 
   m_mv1 = new Histogram({mv1_axis}, hflag); 
   m_mv1c = new Histogram({mv1_axis}, hflag); 
+  m_mvb = new Histogram({mv2_axis}, hflag); 
   m_gaia_anti_light = new Histogram({gaia_axis}, hflag); 
   m_gaia_anti_charm = new Histogram({gaia_axis}, hflag); 
   m_gaia_gr1 = new Histogram({gaia_axis}, hflag); 
@@ -49,6 +51,7 @@ BtagHists::BtagHists() :
 BtagHists::~BtagHists() { 
   delete m_mv1; 
   delete m_mv1c; 
+  delete m_mvb; 
   delete m_gaia_anti_light; 
   delete m_gaia_anti_charm; 
   delete m_gaia_gr1; 
@@ -60,6 +63,7 @@ BtagHists::~BtagHists() {
 void BtagHists::fill(const Jet& jet, double weight) { 
   m_mv1->fill(jet.mv1, weight); 
   m_mv1c->fill(jet.mv1c, weight); 
+  m_mvb->fill(jet.mvb, weight); 
   m_gaia_anti_light->fill(btagAntiU(jet.gaia), weight); 
   m_gaia_anti_charm->fill(btagAntiC(jet.gaia), weight); 
   m_gaia_gr1->fill(gr1(jet.gaia), weight); 
@@ -71,6 +75,7 @@ void BtagHists::fill(const Jet& jet, double weight) {
 void BtagHists::writeTo(H5::CommonFG& fg) { 
   m_mv1->write_to(fg, "mv1"); 
   m_mv1c->write_to(fg, "mv1c"); 
+  m_mvb->write_to(fg, "mvb"); 
   m_gaia_anti_light->write_to(fg, "gaiaAntiU"); 
   m_gaia_anti_charm->write_to(fg, "gaiaAntiC"); 
   m_gaia_gr1->write_to(fg, "gaiaGr1"); 
