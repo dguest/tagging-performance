@@ -5,10 +5,21 @@
 #include <cstring>
 
 void usage(std::string call) { 
-  printf("usage: %s [-ht | -o <out file>] <root file>...\n", call.c_str()); 
+  printf("usage: %s [-h] [-t] [-o <out file>] <root file>...\n", 
+	 call.c_str()); 
 }
 void help() { 
-  printf(" -h for help\n -t for test (run over fewer events)\n"); 
+  const char* help = 
+    "\n"
+    "Builds histograms and saves them in <out file>.\n"
+    "Inputs are D3PDs, output is stored as HDF5.\n"
+    "\n"
+    "options: \n"
+    " -h for help\n"
+    " -t for test (run over fewer events, print diagnostics)\n"
+    " -o to set output file (defaults to test.h5)\n"
+    "\n"; 
+  printf(help); 
 }
 
 int main(int narg, char* argv[]) { 

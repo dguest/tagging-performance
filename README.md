@@ -1,21 +1,32 @@
 # Jet Tagging Performance Plots
 
-This is to test things and compare jet tagger performance. 
+Package to compare jet tagger performance. 
 
-## Required Packages 
+The code is divided into two parts, each accessed by its own executable in `scripts/`: 
 
-This package requires [ROOT][0] to read ATLAS data. Fortunately the use is minimal: no fancy PyROOT or Roofit installation required. 
+ - `tag-perf-hists`: fill histograms. The routine creates histograms from a D3PD and stores them as an HDF5 file. For basic usage see `tag-perf-hists -h`.
+ - `tag-draw.py`: plot histograms. Draws all the histograms using the HDF5 file produced by `tag-perf-hists`. 
 
-Unfortunately there are a few other dependencies. The upshot is that these packages are fairly standard for python data analysis, and thus quite easy to use. They are generally installed using something like `python3.3 setup.py install`.  
+## Dependencies 
 
-- [Python 3.3][1] is used throughout (when installing from source, use `--enable-shared`)
+### Histogram filling:
+
+ - A compiler supporting c++11 
+ - [ROOT][0] (minimal: no fancy PyROOT or Roofit installation required)
+ - [HDF5][2] (be sure to install with `--enable-cxx`)
+
+### Plotting: 
+
+These packages are fairly standard for python data analysis, and thus quite easy to use. They are generally installed using something like `python3.3 setup.py install`. Note that ROOT is **not** used (or required) for plotting.
+
+- [Python 3.3][1] (when installing from source, use `--enable-shared`)
 - [Numpy][4] 
-- HDF5 is used for binary data storage: 
- + [HDF5][2] basic library (be sure to install with `--enable-cxx`)
+- HDF5: 
+ + [HDF5][2] 
  + [h5py][3] for python bindings
 - [matplotlib][7] for plotting 
 
-Optional: 
+### Optional Plotting: 
 
 - [scipy][8] for various functions (that can be disabled)
 - [pyyaml][5] for [yaml][6] (if not installed use json instead)
