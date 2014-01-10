@@ -7,6 +7,14 @@ The code is divided into two parts, each accessed by its own executable in `scri
  - `tag-perf-hists`: fill histograms. The routine creates histograms from a D3PD and stores them as an HDF5 file. For basic usage see `tag-perf-hists -h`.
  - `tag-draw.py`: plot histograms. Draws all the histograms using the HDF5 file produced by `tag-perf-hists`. 
 
+## Installing
+
+This code has been tested on Ubuntu 12.04, Mac OSX, SLC5, and SLC6. If your default compiler doesn't support c++11, the `CXX` environment variable must point to a compiler that does. Once you've cloned the repository, it should install with 
+
+    make
+
+This should build the histogram filling executable and run `install/pysetup.py install` which will add the local python modules to your python search path. 
+
 ## Dependencies 
 
 ### Histogram filling:
@@ -22,7 +30,7 @@ These packages are fairly standard for python data analysis, and thus quite easy
 - [Python 3.3][1] (when installing from source, use `--enable-shared`)
 - [Numpy][4] 
 - HDF5: 
- + [HDF5][2] 
+ + [HDF5][2] basic installation 
  + [h5py][3] for python bindings
 - [matplotlib][7] for plotting 
 
