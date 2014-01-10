@@ -11,22 +11,23 @@ import os, sys
 import math
 import warnings
 
-def make_plots(in_file_name, out_dir, ext): 
+def make_plots(in_file_name, out_dir, ext, subset=None): 
     if not isdir(out_dir): 
         os.mkdir(out_dir)
     with h5py.File(in_file_name, 'r') as in_file: 
         for eff in [0.6, 0.7, 0.8]: 
-            for rej_flavor in 'UC': 
+            for rej_flavor in 'UCT': 
                 draw_pt_bins(in_file, out_dir, rej_flavor=rej_flavor, 
-                             eff=eff, ext=ext)
+                             eff=eff, ext=ext, subset=subset)
 
-def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf'): 
+def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf', 
+                 subset=None): 
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ax.grid(which='both')
     ax.set_xscale('log')
-    for tagger in tagschema.get_taggers(in_file): 
+    for tagger in tagschema.get_taggers(in_file, subset): 
         pt_bins = tagschema.get_pt_bins(in_file['B/btag/ptBins'])
         eff_group = in_file['B/btag/ptBins']
         rej_group = in_file['{}/btag/ptBins'.format(rej_flavor.upper())]
@@ -109,8 +110,11 @@ def tick_format(x, pos):
     else:
         return '{:.0f}'.format(x)
 
+_label_alias = {'t':r'\tau'}
 def rej_label(rej_flavor, eff): 
-    pt1 = '$1/\epsilon_{{ \mathrm{{ {} }} }}$'.format(rej_flavor.lower())
+    lowered = rej_flavor.lower()
+    flavor_label = _label_alias.get(lowered, lowered)
+    pt1 = '$1/\epsilon_{{ \mathrm{{ {} }} }}$'.format(flavor_label)
     pt2 = ' (fixed $\epsilon_{{b}}$ = {})'.format(eff)
     return pt1 + pt2
 

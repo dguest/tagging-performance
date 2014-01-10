@@ -41,8 +41,16 @@ class ColorScheme(dict):
             ymlfile.write(out_str)
             
 
-def get_taggers(in_file): 
-    return in_file['B/btag/all/'].keys()
+def get_taggers(in_file, subset=None): 
+    taggers = set(in_file['B/btag/all/'].keys())
+    if subset: 
+        sset = set(subset)
+        not_found = sset - taggers
+        if not_found: 
+            raise ValueError(
+                "taggers don't exist: {}".format(', '.join(not_found)))
+        taggers &= sset
+    return taggers
 
 def get_pt_bins(group): 
     pt_bins = {}

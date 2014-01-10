@@ -17,6 +17,8 @@ def run():
     parser.add_argument(
         '-p', '--plots', help='plots to make (default %(default)s)', 
         choices=fdict.keys(), default='all')
+    parser.add_argument(
+        '-t', '--taggers', help='only plot a subset of b-taggers', nargs='+')
     args = parser.parse_args(sys.argv[1:])
     
     if args.plots == 'all': 
@@ -49,7 +51,8 @@ def roc(args):
 def pt(args): 
     from tagperf import tagpt
     print('making pt plots')
-    tagpt.make_plots(args.hdf_file, args.out_dir, args.ext)
+    tagpt.make_plots(args.hdf_file, args.out_dir, args.ext, 
+                     subset=args.taggers)
 
 if __name__ == '__main__': 
     run()
