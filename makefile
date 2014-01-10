@@ -66,12 +66,12 @@ T_DICTS     := $(TOBJ:.o=Dict.o)
 # stuff used for the c++ executable
 STAND_ALONE_OBJ     := $(GEN_OBJ) $(TOBJ) $(T_DICTS) stand-alone.o
 STAND_ALONE_NAME  := tag-perf-hists
-STAND_ALONE    := $(OUTPUT)/$(STAND_ALONE)
+STAND_ALONE    := $(OUTPUT)/$(STAND_ALONE_NAME)
 
 all: ndhist $(STAND_ALONE) 
 	@$(shell ./install/pysetup.py install)
 
-$(OUTPUT)/tag-perf-hists: $(STAND_ALONE_OBJ:%=$(BIN)/%)
+$(STAND_ALONE): $(STAND_ALONE_OBJ:%=$(BIN)/%)
 	@mkdir -p $(OUTPUT)
 	@echo "linking $^ --> $@"
 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
@@ -123,7 +123,7 @@ $(DEP)/%.d: %.cxx
 CLEANLIST     = *~ *.o *.o~ *.d core 
 clean:
 	rm -fr $(CLEANLIST) $(CLEANLIST:%=$(BIN)/%) $(CLEANLIST:%=$(DEP)/%)
-	rm -fr $(BIN) $(ALLOUTPUT) $(DICT)
+	rm -fr $(BIN) $(DICT) $(STAND_ALONE)
 	@$(MAKE) -C $(ND_HIST) clean
 	@$(shell ./install/pysetup.py remove)
 
