@@ -16,7 +16,7 @@ class ColorScheme(dict):
     Keeps track of / assigns colors for the taggers. 
     Assignments are stored in a yaml file. 
     """
-    colors = list('bgrcmyk') + ['orange']
+    colors = list('bgrcmyk') + ['orange', 'brown']
     def __init__(self, file_name): 
         self.yaml_file = file_name
         if isfile(file_name): 
@@ -50,7 +50,7 @@ def get_taggers(in_file, subset=None):
             raise ValueError(
                 "taggers don't exist: {}".format(', '.join(not_found)))
         taggers &= sset
-    return taggers
+    return sorted(taggers)
 
 def get_pt_bins(group): 
     pt_bins = {}
