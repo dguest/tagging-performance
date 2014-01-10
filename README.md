@@ -14,8 +14,11 @@ The code is divided into two parts, each accessed by its own executable in
 
 This code has been tested on Ubuntu 12.04, Mac OSX, SLC5, and SLC6. If your
 default compiler doesn't support c++11, the `CXX` environment variable must
-point to a compiler that does. Once you've cloned the repository, it should
-install with
+point to a compiler that does. Clone with 
+
+    git clone --recursive <repository url>
+
+Once you've cloned the repository, it should install with
 
     make
 
