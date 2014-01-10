@@ -76,7 +76,6 @@ $(OUTPUT)/tag-perf-hists: $(STAND_ALONE_OBJ:%=$(BIN)/%)
 	@echo "linking $^ --> $@"
 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
-export HDF_PATH
 ndhist: 
 	@$(MAKE) -C $(ND_HIST) 
 
