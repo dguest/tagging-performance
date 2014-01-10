@@ -37,14 +37,6 @@ ROOTLIBS      += -lCore -lTree -lRIO
 ROOTLIBS      += -lCint		# don't know why we need this...
 ROOTLDFLAGS   := $(shell root-config --ldflags)
 
-# and py config
-PY_CONFIG := python3.3-config
-
-PY_FLAGS :=   $(shell $(PY_CONFIG) --includes)
-PY_LIB   := -L$(shell $(PY_CONFIG) --prefix)/lib
-PY_LIB   +=   $(shell $(PY_CONFIG) --libs)
-
-
 # --- set compiler and flags (roll c options and include paths together)
 CXX          ?= g++
 CXXFLAGS     := -O2 -Wall -fPIC -I$(INC) -I$(ND_HIST_INC) -g -std=c++11
@@ -58,15 +50,10 @@ LIBS         += -L$(HDF_PATH)/lib -Wl,-rpath,$(HDF_PATH)/lib
 # --- HDF5 needed for hist saving
 LIBS         += -lhdf5_cpp -lhdf5 
 
-# rootstuff 
+# --- rootstuff 
 CXXFLAGS     += $(ROOTCFLAGS)
 LDFLAGS      += $(ROOTLDFLAGS)
 LIBS         += $(ROOTLIBS)
-
-# pystuff (roll the linking options and libraries together)
-PY_LDFLAGS := $(LDFLAGS)
-PY_LDFLAGS += $(PY_LIB)
-PY_LDFLAGS += -shared
 
 # ---- define objects
 TOBJ        := TreeBuffer.o
@@ -76,45 +63,24 @@ EXE_OBJ     := $(GEN_OBJ) $(TOBJ)
 PYLIB_OBJ   := $(GEN_OBJ) $(TOBJ)
 T_DICTS     := $(TOBJ:.o=Dict.o)
 
+# stuff used for the c++ executable
 STAND_ALONE_OBJ     := $(GEN_OBJ) $(TOBJ) $(T_DICTS) stand-alone.o
+STAND_ALONE_NAME  := tag-perf-hists
+STAND_ALONE    := $(OUTPUT)/$(STAND_ALONE)
 
-# PY_OBJ       := _hfw.o
-# PY_LIB       := ../python/stop/stack/_hfw.so
-
-ALLOBJ       := $(GEN_OBJ) $(PY_OBJ) $(TOBJ) 
-
-# ALLOUTPUT    := $(PY_LIB) unit-test stand-alone
-STAND_ALONE  := tag-perf-hists
-ALLOUTPUT    := $(OUTPUT)/$(STAND_ALONE)
-
-all: ndhist $(ALLOUTPUT) 
+all: ndhist $(STAND_ALONE) 
 	@$(shell ./install/pysetup.py install)
-
-# unit-test: $(EXE_OBJ:%=$(BIN)/%)
-# 	@echo "linking $^ --> $@"
-# 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
 $(OUTPUT)/tag-perf-hists: $(STAND_ALONE_OBJ:%=$(BIN)/%)
 	@mkdir -p $(OUTPUT)
 	@echo "linking $^ --> $@"
 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
-# $(PY_LIB): $(PYLIB_OBJ:%=$(BIN)/%) $(PY_OBJ:%=$(BIN)/%)
-# 	@mkdir -p $(shell dirname $(PY_LIB))
-# 	@echo "linking $^ --> $@"
-# 	@$(CXX) -o $@ $^ $(LIBS) $(PY_LDFLAGS)
-
 export HDF_PATH
 ndhist: 
 	@$(MAKE) -C $(ND_HIST) 
 
 # --------------------------------------------------
-
-# python object compile
-$(BIN)/_%.o: _%.cxx 
-	@echo compiling python object $@
-	@mkdir -p $(BIN)
-	@$(CXX) -c $(CXXFLAGS) $(PY_FLAGS) $< -o $@ 
 
 # compile rule
 $(BIN)/%.o: %.cxx
@@ -123,12 +89,14 @@ $(BIN)/%.o: %.cxx
 	@$(CXX) -c $(CXXFLAGS) $< -o $@
 
 # root dictionary generation 
+SED_DICT_SUB := 's,\#include "$(INC)/\(.*\)",\#include "\1",g'
 $(DICT)/%Dict.cxx: %.h LinkDef.h
 	@echo making dict $@
 	@mkdir -p $(DICT)
 	@rm -f $(DICT)/$*Dict.h $(DICT)/$*Dict.cxx 
 	@rootcint $@ -c $(INC)/$*.h
-	@sed -i 's,#include "$(INC)/\(.*\)",#include "\1",g' $(DICT)/$*Dict.h
+	@sed $(SED_DICT_SUB) $(DICT)/$*Dict.h > $@.tmp
+	@mv -f $@.tmp $@
 
 $(BIN)/%Dict.o: $(DICT)/%Dict.cxx 
 	@mkdir -p $(BIN)
@@ -136,6 +104,7 @@ $(BIN)/%Dict.o: $(DICT)/%Dict.cxx
 	@$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -c $< -o $@
 
 # use auto dependency generation
+ALLOBJ       := $(GEN_OBJ) $(PY_OBJ) $(TOBJ) 
 DEP = $(BIN)
 
 ifneq ($(MAKECMDGOALS),clean)
