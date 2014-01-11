@@ -17,9 +17,8 @@ void help() {
     "options: \n"
     " -h for help\n"
     " -t for test (run over fewer events, print diagnostics)\n"
-    " -o to set output file (defaults to test.h5)\n"
-    "\n"; 
-  printf(help); 
+    " -o to set output file (defaults to test.h5)\n"; 
+  puts(help); 
 }
 
 int main(int narg, char* argv[]) { 
