@@ -84,7 +84,7 @@ STAND_ALONE_OBJ_PATHS := $(STAND_ALONE_OBJ:%=$(BIN)/%)
 # we call the dummy first, which builds the dependencies. 
 # _after_ these have been built we call the linking rule. 
 $(STAND_ALONE_DUMMY): $(NDHIST_DUMMY) $(STAND_ALONE_OBJ_PATHS) 
-	@$(MAKE) $(STAND_ALONE)
+	@$(MAKE) $(STAND_ALONE) --no-print-directory 
 
 $(STAND_ALONE): $(STAND_ALONE_OBJ_PATHS) 
 	@mkdir -p $(OUTPUT)
@@ -92,7 +92,7 @@ $(STAND_ALONE): $(STAND_ALONE_OBJ_PATHS)
 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
 $(NDHIST_DUMMY): 
-	@$(MAKE) -C $(ND_HIST_DIR) 
+	@$(MAKE) -C $(ND_HIST_DIR) --no-print-directory -s
 
 # --------------------------------------------------
 
