@@ -7,8 +7,8 @@ The code is divided into two parts, each accessed by its own executable in
 
  - `tag-perf-hists`: fill histograms. The routine creates histograms from a D3PD
    and stores them as an HDF5 file. For basic usage see `tag-perf-hists -h`.
- - `tag-draw.py`: plot histograms. Draws all the histograms using the HDF5 file
-   produced by `tag-perf-hists`.
+ - `tag-draw.py`: draw plots. Draws all the performance plots using
+   the HDF5 file produced by `tag-perf-hists`.
 
 ## Installing
 
