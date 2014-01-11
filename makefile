@@ -70,16 +70,24 @@ STAND_ALONE    := $(OUTPUT)/$(STAND_ALONE_NAME)
 
 # phony target used to call ndhist makefile
 NDHIST_DUMMY := buildndhist
+STAND_ALONE_DUMMY := build-stand-alone
 
-all: $(STAND_ALONE)
+# --- top level command ---
+all: $(STAND_ALONE_DUMMY)
 	@$(shell ./install/pysetup.py install)
 	@echo "#### successful build ####"
 
-STAND_ALONE_OBJ_PATHS = $(STAND_ALONE_OBJ:%=$(BIN)/%) 
-$(STAND_ALONE): $(STAND_ALONE_OBJ_PATHS) $(NDHIST_DUMMY)
+STAND_ALONE_OBJ_PATHS := $(STAND_ALONE_OBJ:%=$(BIN)/%) 
+
+# we call the dummy first, which builds the dependencies. 
+# _after_ these have been built we call the linking rule. 
+$(STAND_ALONE_DUMMY): $(NDHIST_DUMMY) $(STAND_ALONE_OBJ_PATHS) 
+	@$(MAKE) $(STAND_ALONE)
+
+$(STAND_ALONE): $(STAND_ALONE_OBJ_PATHS) 
 	@mkdir -p $(OUTPUT)
 	@echo "linking $^ --> $@"
-	@$(CXX) -o $@ $(STAND_ALONE_OBJ_PATHS) $(LIBS) $(LDFLAGS)
+	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
 
 $(NDHIST_DUMMY): 
 	@$(MAKE) -C $(ND_HIST_DIR) 
@@ -124,7 +132,7 @@ $(DEP)/%.d: %.cxx
 	@$(CXX) -MM -MP $(DEPTARGSTR) $(CXXFLAGS) $(PY_FLAGS) $< -o $@ 
 
 # clean
-.PHONY : clean rmdep $(NDHIST_DUMMY) 
+.PHONY : clean rmdep $(NDHIST_DUMMY) $(STAND_ALONE_DUMMY)
 CLEANLIST     = *~ *.o *.o~ *.d core 
 clean:
 	rm -fr $(CLEANLIST) $(CLEANLIST:%=$(BIN)/%) $(CLEANLIST:%=$(DEP)/%)
