@@ -26,9 +26,9 @@ ifndef HDF_PATH
 $(error "couldn't find HDF, quitting")
 endif
 
-ND_HIST          := $(CURDIR)/ndhist
-ND_HIST_INC      := $(ND_HIST)/include
-ND_HIST_LIB      := $(ND_HIST)/lib
+ND_HIST_DIR      := $(CURDIR)/ndhist
+ND_HIST_INC      := $(ND_HIST_DIR)/include
+ND_HIST_LIB      := $(ND_HIST_DIR)/lib
 
 # --- load in root config
 ROOTCFLAGS    := $(shell root-config --cflags)
@@ -68,16 +68,21 @@ STAND_ALONE_OBJ     := $(GEN_OBJ) $(TOBJ) $(T_DICTS) stand-alone.o
 STAND_ALONE_NAME  := tag-perf-hists
 STAND_ALONE    := $(OUTPUT)/$(STAND_ALONE_NAME)
 
-all: ndhist $(STAND_ALONE) 
-	@$(shell ./install/pysetup.py install)
+# phony target used to call ndhist makefile
+NDHIST_DUMMY := buildndhist
 
-$(STAND_ALONE): $(STAND_ALONE_OBJ:%=$(BIN)/%)
+all: $(STAND_ALONE)
+	@$(shell ./install/pysetup.py install)
+	@echo "#### successful build ####"
+
+STAND_ALONE_OBJ_PATHS = $(STAND_ALONE_OBJ:%=$(BIN)/%) 
+$(STAND_ALONE): $(STAND_ALONE_OBJ_PATHS) $(NDHIST_DUMMY)
 	@mkdir -p $(OUTPUT)
 	@echo "linking $^ --> $@"
-	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
+	@$(CXX) -o $@ $(STAND_ALONE_OBJ_PATHS) $(LIBS) $(LDFLAGS)
 
-ndhist: 
-	@$(MAKE) -C $(ND_HIST) 
+$(NDHIST_DUMMY): 
+	@$(MAKE) -C $(ND_HIST_DIR) 
 
 # --------------------------------------------------
 
@@ -119,12 +124,12 @@ $(DEP)/%.d: %.cxx
 	@$(CXX) -MM -MP $(DEPTARGSTR) $(CXXFLAGS) $(PY_FLAGS) $< -o $@ 
 
 # clean
-.PHONY : clean rmdep ndhist
+.PHONY : clean rmdep $(NDHIST_DUMMY) 
 CLEANLIST     = *~ *.o *.o~ *.d core 
 clean:
 	rm -fr $(CLEANLIST) $(CLEANLIST:%=$(BIN)/%) $(CLEANLIST:%=$(DEP)/%)
 	rm -fr $(BIN) $(DICT) $(STAND_ALONE)
-	@$(MAKE) -C $(ND_HIST) clean
+	@$(MAKE) -C $(ND_HIST_DIR) clean
 	@$(shell ./install/pysetup.py remove)
 
 rmdep: 
