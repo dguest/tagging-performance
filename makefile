@@ -75,7 +75,9 @@ STAND_ALONE_DUMMY := build-stand-alone
 # --- top level command ---
 all: $(STAND_ALONE_DUMMY)
 	@$(shell ./install/pysetup.py install)
+	@echo "##########################"
 	@echo "#### successful build ####"
+	@echo "##########################"
 
 STAND_ALONE_OBJ_PATHS := $(STAND_ALONE_OBJ:%=$(BIN)/%) 
 
