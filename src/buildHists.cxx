@@ -36,7 +36,7 @@ int buildHists(std::vector<std::string> files, std::string out_name,
   }
   if (test) printf("done event loop, saving\n"); 
   
-  H5::H5File out_file(out_name, H5F_ACC_EXCL); 
+  H5::H5File out_file(out_name.c_str(), H5F_ACC_EXCL); 
   hists.writeTo(out_file); 
   if (error_jets) { 
     printf("%i of %i jets have errors (%f%%)\n", 

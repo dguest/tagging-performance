@@ -170,7 +170,7 @@ void FlavoredHists::writeTo(H5::CommonFG& fg) {
     std::string bin_high = binString(pt_itr.first); 
     if ( (pt_itr.second >= 0) && (pt_itr.second < m_pt_bins.size() )) { 
       auto bin_name = last_bin + "-" + bin_high; 
-      H5::Group this_bin(pt_bins.createGroup(bin_name)); 
+      H5::Group this_bin(pt_bins.createGroup(bin_name.c_str())); 
       auto& pt_hist = m_pt_btag.at(pt_itr.second); 
       pt_hist.writeTo(this_bin); 
     }
@@ -198,7 +198,7 @@ void JetPerfHists::writeTo(H5::CommonFG& fg) {
   for (Flavor flavor: {Flavor::B, Flavor::C, Flavor::U, Flavor::T}) { 
     std::string name = flavorString(flavor); 
     size_t index = static_cast<size_t>(flavor); 
-    H5::Group flav_group(fg.createGroup(name)); 
+    H5::Group flav_group(fg.createGroup(name.c_str())); 
     m_flavors.at(index).writeTo(flav_group); 
   }
 }
