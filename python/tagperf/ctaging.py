@@ -13,11 +13,14 @@ from matplotlib.ticker import FuncFormatter
 from matplotlib.lines import Line2D
 
 def make_plots(in_file_name, cache_name, out_dir, ext): 
+    """
+    Top level routine to make plots from tagger output distributions
+    """
     with h5py.File(in_file_name, 'r') as in_file: 
         with h5py.File(cache_name, 'a') as out_file: 
-            make_rejrej(in_file, out_file, tagger='gaia')
-            make_rejrej(in_file, out_file, tagger='jfc')
-            make_rejrej(in_file, out_file, tagger='jfit')
+            _make_rejrej(in_file, out_file, tagger='gaia')
+            _make_rejrej(in_file, out_file, tagger='jfc')
+            _make_rejrej(in_file, out_file, tagger='jfit')
 
     if not isdir(out_dir): 
         os.mkdir(out_dir)
@@ -36,6 +39,10 @@ def _get_hist_name(flavor, tagger, binning):
     return '{}/ctag/{}/{}'.format(flavor, binning, tagger)
 
 def _get_rej_hist(int_counts): 
+    """
+    Convert integrated counts (from tagger output distributions) to 
+    1 / efficiency (without warnings). 
+    """
     rej = np.zeros(int_counts.shape)
     valid = int_counts != 0
     rej[valid] = int_counts.max() / int_counts[valid]
@@ -46,7 +53,10 @@ def _get_rej_hist(int_counts):
 def _get_eff_hist(int_counts): 
     return int_counts / int_counts.max()
 
-def make_rejrej(in_file, out_file, tagger='gaia', binning='all'): 
+def _make_rejrej(in_file, out_file, tagger='gaia', binning='all'): 
+    """
+    Builds 2d efficiency arrays, binned by rejection. 
+    """
     def make_int_flavor(flavor): 
         ds = in_file[_get_hist_name(flavor, tagger=tagger, binning=binning)]
         return np.array(ds)[::-1,::-1].cumsum(axis=0).cumsum(axis=1)
@@ -71,9 +81,14 @@ def make_rejrej(in_file, out_file, tagger='gaia', binning='all'):
     saved_ds = out_file[tagger].create_dataset(binning, data=rej_array)
     saved_ds.attrs['x_max'] = rej_builder.x_max
     saved_ds.attrs['y_max'] = rej_builder.y_max
+    saved_ds.attrs['x_min'] = rej_builder.x_min
+    saved_ds.attrs['y_min'] = rej_builder.y_min
     saved_ds.attrs['xyz'] = 'BUC'
 
 class ProgBar: 
+    """
+    Generic progress "bar". 
+    """
     def __init__(self, total, prefix=''): 
         self.total = total
         self.prefix = prefix
@@ -91,15 +106,24 @@ class ProgBar:
         sys.stdout.flush()
     
 class RejRejComp: 
+    """
+    Class to convert three arrays (one efficiency and two rejection) into
+    a 2D efficiency array binned by rejection. 
+    """
     def __init__(self): 
         self.n_bins = 100
+        self.x_min = 1.0
+        self.y_min = 1.0
         self.x_max = 200.0
         self.y_max = 1000.0
 
+    def _logspace(self, low, high): 
+        return np.logspace(math.log10(low), math.log10(high), self.n_bins)
+
     def get_rej_array(self, eff, xrej, yrej): 
         valid_rej = np.isfinite(xrej) & np.isfinite(yrej)
-        x_bin_edges = np.logspace(0, math.log10(self.x_max), self.n_bins)
-        y_bin_edges = np.logspace(0, math.log10(self.y_max), self.n_bins)
+        x_bin_edges = self._logspace(self.x_min, self.x_max)
+        y_bin_edges = self._logspace(self.y_min, self.y_max)
 
         x_bins = np.digitize(xrej[valid_rej], bins=x_bin_edges) - 1
         y_bins = np.digitize(yrej[valid_rej], bins=y_bin_edges) - 1
@@ -141,6 +165,9 @@ def draw_ctag_rejrej_slow(in_file, out_dir, ext='.pdf'):
 
 
 def draw_ctag_rejrej(in_file, out_dir, ext='.pdf'): 
+    """
+    Basic heatmap of efficiency vs two rejections. 
+    """
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
@@ -168,6 +195,9 @@ def draw_ctag_rejrej(in_file, out_dir, ext='.pdf'):
 
 def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts): 
     """
+    Heat map showing efficiency ratio gaia and some other tagger. 
+    Makes iso-efficiency contours for gaia. 
+
     misc options: 
       tagger
       tagger_disp (for display)
@@ -213,6 +243,10 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts):
         canvas.print_figure(out_name, bbox_inches='tight')
 
 def draw_contour_rejrej(in_file, out_dir, ext='.pdf'): 
+    """
+    Compare efficiency of two taggers. Draw one set of contours for the 
+    numerator tagger, another set for the ratio between the two taggers. 
+    """
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
@@ -230,6 +264,9 @@ def draw_contour_rejrej(in_file, out_dir, ext='.pdf'):
     canvas.print_figure(out_name, bbox_inches='tight')
 
 def draw_simple_rejrej(in_file, out_dir, ext='.pdf'): 
+    """
+    Draw iso-efficiency contours for one tagger (no colors). 
+    """
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
@@ -246,6 +283,10 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf'):
     canvas.print_figure(out_name, bbox_inches='tight')
 
 def draw_cprob_rejrej(in_file, in_file_up, out_dir, ext='.pdf'): 
+    """
+    Map of iso-efficiency contours, with an overlay for the rejections
+    of a 1d cut. 
+    """
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
@@ -266,6 +307,10 @@ def draw_cprob_rejrej(in_file, in_file_up, out_dir, ext='.pdf'):
 # =========== draw utilities ===========
 
 def _add_cprob_curve(ax, in_file, levels): 
+    """
+    Add a curve indicating the possible rejections for a 1D discriminator 
+    cut. Also add points at various efficiency levels. 
+    """
     def getint(flavor): 
         name = '{}/ctag/all/gaiaC'.format(flavor)
         return np.array(in_file[name])[::-1].cumsum()
@@ -296,6 +341,9 @@ def _add_cprob_curve(ax, in_file, levels):
     ax.legend(reversed(handles), reversed(labels), numpoints=1)
 
 def _add_contour(ax, ds, opts={}): 
+    """
+    routine to add the iso-efficiency contours to a plot. 
+    """
     eff_array = _maximize_efficiency(np.array(ds))
     xmin = ds.attrs.get('x_min', 1.0)
     ymin = ds.attrs.get('y_min', 1.0)
@@ -316,6 +364,9 @@ def _add_contour(ax, ds, opts={}):
     ax.clabel(ct, fontsize=12, inline=True, fmt = '%.2f')
 
 def _smooth(ratio_array, sigma): 
+    """
+    Gaussian smoothing function, doesn't work without scipy. 
+    """
     if not sigma: 
         return ratio_array
     try: 
@@ -327,6 +378,10 @@ def _smooth(ratio_array, sigma):
     return ratio_array
 
 def _add_eq_contour(ax, ds, ds_denom, colorbar=None, levels=[], smooth=None): 
+    """
+    Add contours where ds and ds_denom have equal efficiency (ratio = 1). The
+    'levels' argument can be used to specify contours at ratios other than 1.
+    """
     eff_array = _maximize_efficiency(np.array(ds))
     other_array = _maximize_efficiency(np.array(ds_denom))
     ratio_array = _smooth(eff_array / other_array, sigma=smooth)
@@ -373,8 +428,17 @@ def _label_axes(ax, ds):
                   y=0.98, ha='right')
 
 def _get_arr_extent(ds): 
-    xmin = ds.attrs.get('x_min', 1.0)
-    ymin = ds.attrs.get('y_min', 1.0)
+    """
+    Retreve the extent of an array stored by _make_rejrej. 
+    """
+    try: 
+        xmin = ds.attrs['x_min']
+        ymin = ds.attrs['y_min']
+    except KeyError: 
+        warnings.warn("no stored minimum for rejrej array, assume 1", 
+                      stacklevel=2)
+        xmin = 1.0
+        ymin = 1.0
     xmax = ds.attrs['x_max']
     ymax = ds.attrs['y_max']
     eff_array = _maximize_efficiency(np.array(ds))
