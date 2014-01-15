@@ -21,6 +21,7 @@ public:
   void getEntry(int); 
   int size(); 
   int entry() const; 
+  void saveSetBranches(const std::string& file_name); 
   std::vector<float>*  jet_pt; 
   std::vector<float>*  jet_eta; 
   std::vector<float>*  jet_MV1; 

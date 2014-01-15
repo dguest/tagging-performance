@@ -1,6 +1,7 @@
 #include "TreeBuffer.h"
 #include "SmartChain.hh"
 #include "TROOT.h"
+#include <fstream> // ofstream
 
 void TagVectors::set(SmartChain* chain, std::string prefix) { 
   chain->SetBranch(prefix + "pu", &pu); 
@@ -54,4 +55,11 @@ int TreeBuffer::size() {
 
 int TreeBuffer::entry() const { 
   return m_entry; 
+}
+
+void TreeBuffer::saveSetBranches(const std::string& file_name) { 
+  std::ofstream out_file(file_name); 
+  for (auto br_name: m_chain->get_all_branch_names()) { 
+    out_file << br_name << "\n"; 
+  }
 }
