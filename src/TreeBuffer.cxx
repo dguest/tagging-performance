@@ -1,4 +1,4 @@
-#include "TreeBuffer.h"
+#include "TreeBuffer.hh"
 #include "SmartChain.hh"
 #include "TROOT.h"
 #include <fstream> // ofstream

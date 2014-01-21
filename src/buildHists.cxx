@@ -1,5 +1,5 @@
 #include "buildHists.hh"
-#include "TreeBuffer.h"
+#include "TreeBuffer.hh"
 #include "Jet.hh"
 #include "JetPerfHists.hh"
 #include "misc_func.hh"
