@@ -13,8 +13,8 @@ The code is divided into two parts, each accessed by its own executable in
 ## Installing
 
 This code has been tested on Ubuntu 12.04, Mac OSX, SLC5, and SLC6. If your
-default compiler doesn't support c++11, the `CXX` environment variable must
-point to a compiler that does. Clone with 
+default compiler doesn't support C++11, the `CXX` environment variable must
+point to a compiler that does. Clone with
 
     git clone --recursive <repository url>
 
@@ -22,24 +22,26 @@ Once you've cloned the repository, it should install with
 
     make
 
-This should build the histogram filling executable and run `install/pysetup.py
-install` which will add the local python modules to your python search path.
+This should build the histogram filling executable and run
+`install/pysetup.py install` which will add the local python modules to
+your python search path.
 
 ## Dependencies
 
 ### Histogram filling:
 
- - A compiler supporting c++11
+ - A compiler supporting C++11
  - [ROOT][0] (minimal: no fancy PyROOT or Roofit installation required)
  - [HDF5][2] (be sure to install with `--enable-cxx`)
 
 ### Plotting: 
 
-These packages are fairly standard for python data analysis, and thus quite easy
-to use. They are generally installed using something like `python3.3 setup.py
-install`. Note that ROOT is **not** used (or required) for plotting.
+These packages are fairly standard for python data analysis, and thus quite
+easy to install and use. On most systems they can be installed with the
+package manager, or using something like `python2.7 setup.py install`. Note
+that ROOT is **not** used (or required) for plotting.
 
-- [Python 3.3][1] (when installing from source, use `--enable-shared`)
+- [Python 2.7][1] (when installing from source, use `--enable-shared`)
 - [Numpy][4] 
 - HDF5: 
  + [HDF5][2] basic installation 

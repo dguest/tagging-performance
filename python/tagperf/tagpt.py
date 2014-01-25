@@ -119,7 +119,7 @@ def rej_label(rej_flavor, eff):
     return pt1 + pt2
 
 # ==== exceptions ====
-class RejectionCalcError(Exception): 
+class RejectionCalcError(StandardError): 
     def __init__(self, *args): 
         super(RejectionCalcError, self).__init__(*args)
 

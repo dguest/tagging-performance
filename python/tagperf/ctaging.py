@@ -86,7 +86,7 @@ def _make_rejrej(in_file, out_file, tagger='gaia', binning='all'):
     saved_ds.attrs['y_min'] = rej_builder.y_min
     saved_ds.attrs['xyz'] = 'BUC'
 
-class ProgBar: 
+class ProgBar(object): 
     """
     Generic progress "bar". 
     """
@@ -103,10 +103,11 @@ class ProgBar:
         else: 
             outstr = '\r{} of {} ({:.0%})'
         sys.stdout.write(outstr.format(
-                entry, self.total, entry / self.total, prefix=self.prefix))
+                entry, self.total, float(entry) / self.total, 
+                prefix=self.prefix))
         sys.stdout.flush()
     
-class RejRejComp: 
+class RejRejComp(object): 
     """
     Class to convert three arrays (one efficiency and two rejection) into
     a 2D efficiency array binned by rejection. 
@@ -350,7 +351,7 @@ def _add_cprob_curve(ax, in_file, levels):
     b_rej_pts = []
     u_rej_pts = []
     for eff in levels: 
-        idx_above, *throw_away = np.nonzero(c_eff > eff)
+        idx_above, = np.nonzero(c_eff > eff)
         first_above = idx_above.min()
         b_pt = b_rej[first_above]
         b_rej_pts.append(b_pt)
