@@ -43,7 +43,7 @@ ROOTLDFLAGS   := $(shell root-config --ldflags)
 # --- set compiler and flags (roll c options and include paths together)
 CXX          ?= g++
 CXXFLAGS     := -O2 -Wall -fPIC -I$(INC) -I$(ND_HIST_INC) -g -std=c++11
-CXXFLAGS     += ${CXXFLAG_HACKS}
+CXXFLAGS     += $(CXXFLAG_HACKS)
 LIBS         := -L$(ND_HIST_LIB) -Wl,-rpath,$(ND_HIST_LIB) -lndhist
 LDFLAGS      := #-Wl,--no-undefined
 
@@ -59,15 +59,11 @@ LDFLAGS      += $(ROOTLDFLAGS)
 LIBS         += $(ROOTLIBS)
 
 # ---- define objects
-TOBJ        := TreeBuffer.o
-GEN_OBJ     := SmartChain.o JetPerfHists.o Jet.o 
+GEN_OBJ     := SmartChain.o JetPerfHists.o Jet.o TreeBuffer.o
 GEN_OBJ     += misc_func.o buildHists.o
-EXE_OBJ     := $(GEN_OBJ) $(TOBJ) 
-PYLIB_OBJ   := $(GEN_OBJ) $(TOBJ)
-T_DICTS     := $(TOBJ:.o=Dict.o)
 
 # stuff used for the c++ executable
-STAND_ALONE_OBJ     := $(GEN_OBJ) $(TOBJ) $(T_DICTS) stand-alone.o
+STAND_ALONE_OBJ     := $(GEN_OBJ) stand-alone.o
 STAND_ALONE_NAME  := tag-perf-hists
 STAND_ALONE    := $(OUTPUT)/$(STAND_ALONE_NAME)
 
@@ -105,23 +101,8 @@ $(BIN)/%.o: %.cxx
 	@mkdir -p $(BIN)
 	@$(CXX) -c $(CXXFLAGS) $< -o $@
 
-# root dictionary generation 
-SED_DICT_SUB := 's,\#include "$(INC)/\(.*\)",\#include "\1",g'
-$(DICT)/%Dict.cxx: %.h LinkDef.h
-	@echo making dict $@
-	@mkdir -p $(DICT)
-	@rm -f $(DICT)/$*Dict.h $(DICT)/$*Dict.cxx 
-	@rootcint $@ -c $(INC)/$*.h
-	@sed $(SED_DICT_SUB) $(DICT)/$*Dict.h > $@.tmp
-	@mv -f $@.tmp $@
-
-$(BIN)/%Dict.o: $(DICT)/%Dict.cxx 
-	@mkdir -p $(BIN)
-	@echo compiling dict $@
-	@$(CXX) $(CXXFLAGS) $(ROOTCFLAGS) -c $< -o $@
-
 # use auto dependency generation
-ALLOBJ       := $(GEN_OBJ) $(PY_OBJ) $(TOBJ) 
+ALLOBJ       := $(GEN_OBJ) 
 DEP = $(BIN)
 
 ifneq ($(MAKECMDGOALS),clean)

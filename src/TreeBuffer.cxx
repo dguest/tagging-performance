@@ -1,6 +1,7 @@
-#include "TreeBuffer.h"
+#include "TreeBuffer.hh"
 #include "SmartChain.hh"
 #include "TROOT.h"
+#include <fstream> // ofstream
 
 void TagVectors::set(SmartChain* chain, std::string prefix) { 
   chain->SetBranch(prefix + "pu", &pu); 
@@ -12,10 +13,9 @@ TreeBuffer::TreeBuffer(const std::vector<std::string>& files) :
   m_chain(0), 
   m_entry(0)
 { 
-  // thanks for this line, ROOT, really. As if we needed any more proof that 
-  // this framework is a complete pile of shit, you've added some cryptic
-  // bullshit that we all have to add to out files to read a fucking
-  // D3PD... Not even a complicated class, a fucking D3PD...
+  // ROOT doesn't know about vectors in TTrees by default. 
+  // The more complicated cases are covered by the LinkDef.h file, but basic
+  // vectors must be loaded here. 
   gROOT->ProcessLine("#include <vector>");
 
   m_chain = new SmartChain("physics"); 
@@ -55,4 +55,11 @@ int TreeBuffer::size() {
 
 int TreeBuffer::entry() const { 
   return m_entry; 
+}
+
+void TreeBuffer::saveSetBranches(const std::string& file_name) { 
+  std::ofstream out_file(file_name); 
+  for (auto br_name: m_chain->get_all_branch_names()) { 
+    out_file << br_name << "\n"; 
+  }
 }

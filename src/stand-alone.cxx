@@ -16,8 +16,11 @@ void help() {
     "\n"
     "options: \n"
     " -h for help\n"
-    " -t for test (run over fewer events, print diagnostics)\n"
-    " -o to set output file (defaults to test.h5)\n"; 
+    " -t for test mode\n"
+    " -o to set output file (defaults to test.h5)\n"
+    "\n"
+    "When in 'test mode', will print more diagnostics, run over fewer events\n"
+    "and save all the used branches in required_branches.txt\n"; 
   puts(help); 
 }
 

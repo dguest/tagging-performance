@@ -1,5 +1,5 @@
 #include "Jet.hh" 
-#include "TreeBuffer.h"
+#include "TreeBuffer.hh"
 
 #include <cassert> 
 

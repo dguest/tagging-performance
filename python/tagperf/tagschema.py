@@ -32,9 +32,9 @@ class ColorScheme(dict):
             if not opts: 
                 raise KeyError("ran out of color keys")
             val = next(iter(opts))
-            super().__setitem__(key, val)
+            super(ColorScheme,self).__setitem__(key, val)
             return val
-        return super().__getitem__(key)
+        return super(ColorScheme,self).__getitem__(key)
     def write(self, fname): 
         with open(fname,'w') as ymlfile: 
             out_str = yaml.dump(dict(self.items()), default_flow_style=False)

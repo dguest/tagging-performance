@@ -1,5 +1,5 @@
 #include "buildHists.hh"
-#include "TreeBuffer.h"
+#include "TreeBuffer.hh"
 #include "Jet.hh"
 #include "JetPerfHists.hh"
 #include "misc_func.hh"
@@ -22,7 +22,6 @@ int buildHists(std::vector<std::string> files, std::string out_name,
   int test_events = std::min(int(100), buffer.size()); 
   const int n_events = test ? test_events: buffer.size(); 
   int total_jets = 0; 
-  int error_jets = 0; 
   if (test) printf("starting loop on %i events\n", n_events); 
   for (int event = 0; event < n_events; event++) { 
     buffer.getEntry(event); 
@@ -34,14 +33,10 @@ int buildHists(std::vector<std::string> files, std::string out_name,
       hists.fill(jet, 1.0); 
     }
   }
+  if (test) buffer.saveSetBranches("required_branches.txt"); 
   if (test) printf("done event loop, saving\n"); 
-  
   H5::H5File out_file(out_name.c_str(), H5F_ACC_EXCL); 
   hists.writeTo(out_file); 
-  if (error_jets) { 
-    printf("%i of %i jets have errors (%f%%)\n", 
-	   error_jets, total_jets, error_jets * 100.0 / total_jets); 
-  }
 
   return 0; 
 }

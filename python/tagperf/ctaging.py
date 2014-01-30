@@ -32,6 +32,7 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         draw_ctag_ratio(cache, out_dir, ext, tagger='jfit', 
                         tagger_disp='COMBNN', vmax=1.9)
         draw_simple_rejrej(cache, out_dir, ext)
+        #draw_xkcd_rejrej(cache, out_dir, ext)
         with h5py.File(in_file_name, 'r') as in_file: 
             draw_cprob_rejrej(cache, in_file, out_dir, ext)
 
@@ -85,7 +86,7 @@ def _make_rejrej(in_file, out_file, tagger='gaia', binning='all'):
     saved_ds.attrs['y_min'] = rej_builder.y_min
     saved_ds.attrs['xyz'] = 'BUC'
 
-class ProgBar: 
+class ProgBar(object): 
     """
     Generic progress "bar". 
     """
@@ -102,10 +103,11 @@ class ProgBar:
         else: 
             outstr = '\r{} of {} ({:.0%})'
         sys.stdout.write(outstr.format(
-                entry, self.total, entry / self.total, prefix=self.prefix))
+                entry, self.total, float(entry) / self.total, 
+                prefix=self.prefix))
         sys.stdout.flush()
     
-class RejRejComp: 
+class RejRejComp(object): 
     """
     Class to convert three arrays (one efficiency and two rejection) into
     a 2D efficiency array binned by rejection. 
@@ -278,9 +280,31 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf'):
     ax.grid(which='both')
     _add_contour(ax, ds, opts=dict(levels=np.arange(0.1, 0.8, 0.05)))
     _label_axes(ax, ds)
-
+    
     out_name = '{}/rejrej-simple{}'.format(out_dir, ext)
     canvas.print_figure(out_name, bbox_inches='tight')
+
+def draw_xkcd_rejrej(in_file, out_dir, ext='.pdf'): 
+    """
+    Draw iso-efficiency contours 'sketch'. 
+    """
+    import matplotlib.pyplot as plt
+    with plt.xkcd():
+        fig = Figure(figsize=(8,6))
+        canvas = FigureCanvas(fig)
+        ax = fig.add_subplot(1,1,1)
+        ds = in_file['gaia/all']
+        ds_denom = in_file['jfc/all']
+        
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        ax.grid(which='both')
+        _add_contour(ax, ds, opts=dict(levels=np.arange(0.1, 0.8, 0.05)))
+        _label_axes(ax, ds)
+    
+        out_name = '{}/rejrej-xkcd{}'.format(out_dir, ext)
+        canvas.print_figure(out_name, bbox_inches='tight')
+
 
 def draw_cprob_rejrej(in_file, in_file_up, out_dir, ext='.pdf'): 
     """
@@ -327,7 +351,7 @@ def _add_cprob_curve(ax, in_file, levels):
     b_rej_pts = []
     u_rej_pts = []
     for eff in levels: 
-        idx_above, *throw_away = np.nonzero(c_eff > eff)
+        idx_above, = np.nonzero(c_eff > eff)
         first_above = idx_above.min()
         b_pt = b_rej[first_above]
         b_rej_pts.append(b_pt)
