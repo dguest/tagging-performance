@@ -32,9 +32,12 @@ ND_HIST_LIB      := $(ND_HIST_DIR)/lib
 
 # --- load in root config
 ROOTCFLAGS    := $(shell root-config --cflags)
-ROOTLIBS      := -L$(shell root-config --libdir)
-ROOTLIBS      += -lCore -lTree -lRIO 
-ROOTLIBS      += -lCint		# don't know why we need this...
+# would be nice to avoid linking everything, but that will probably cause
+# problems...
+ROOTLIBS      := $(shell root-config --libs)
+# ROOTLIBS      := -L$(shell root-config --libdir)
+# ROOTLIBS      += -lCore -lTree -lRIO 
+# ROOTLIBS      += -lCint		# don't know why we need this...
 ROOTLDFLAGS   := $(shell root-config --ldflags)
 
 # --- set compiler and flags (roll c options and include paths together)
