@@ -11,31 +11,31 @@ import os, sys
 import math
 import warnings
 
-def make_plots(in_file_name, out_dir, ext, subset=None): 
-    if not isdir(out_dir): 
+def make_plots(in_file_name, out_dir, ext, subset=None):
+    if not isdir(out_dir):
         os.mkdir(out_dir)
-    with h5py.File(in_file_name, 'r') as in_file: 
-        for eff in [0.6, 0.7, 0.8]: 
-            for rej_flavor in 'UCT': 
-                draw_pt_bins(in_file, out_dir, rej_flavor=rej_flavor, 
+    with h5py.File(in_file_name, 'r') as in_file:
+        for eff in [0.6, 0.7, 0.8]:
+            for rej_flavor in 'UCT':
+                draw_pt_bins(in_file, out_dir, rej_flavor=rej_flavor,
                              eff=eff, ext=ext, subset=subset)
 
-def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf', 
-                 subset=None): 
+def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf',
+                 subset=None):
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ax.grid(which='both')
     ax.set_xscale('log')
-    for tagger in tagschema.get_taggers(in_file, subset): 
+    for tagger in tagschema.get_taggers(in_file, subset):
         pt_bins = tagschema.get_pt_bins(in_file['B/btag/ptBins'])
         eff_group = in_file['B/btag/ptBins']
         rej_group = in_file['{}/btag/ptBins'.format(rej_flavor.upper())]
         x_vals, y_vals, x_err, y_err = _get_pt_xy(
             eff_group, rej_group, pt_bins, eff, tagger=tagger)
-        with tagschema.ColorScheme('colors.yml') as colors: 
+        with tagschema.ColorScheme('colors.yml') as colors:
             ax.errorbar(
-                x_vals, y_vals, label=tagger, #xerr=x_err, 
+                x_vals, y_vals, label=tagger, #xerr=x_err,
                 yerr=y_err, color=colors[tagger])
     ax.legend(numpoints=1, loc='upper left')
     ax.set_xlim(20, np.max(x_vals) * 1.1)
@@ -48,17 +48,17 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf',
         out_dir, rej_flavor.lower(), int(eff*100), ext)
     canvas.print_figure(out_name, bbox_inches='tight')
 
-def _check_round(eff, target, warn_tolerance=0.01, err_tolerance=0.1): 
+def _check_round(eff, target, warn_tolerance=0.01, err_tolerance=0.1):
     roundoff_frac = abs((target - eff) / eff)
-    if roundoff_frac > warn_tolerance: 
+    if roundoff_frac > warn_tolerance:
         prob = 'target eff {}, rounded to {} ({:.0%} off)'.format(
                 target, eff, roundoff_frac)
-        if roundoff_frac > err_tolerance: 
+        if roundoff_frac > err_tolerance:
             raise RoundoffError(prob)
         warnings.warn(prob, stacklevel=3)
 
-def _get_pt_xy(eff_group, rej_group, pt_bins, eff, tagger): 
-    def bin_low_edge(bin_name): 
+def _get_pt_xy(eff_group, rej_group, pt_bins, eff, tagger):
+    def bin_low_edge(bin_name):
         return pt_bins[bin_name][0]
     pt_list = sorted(pt_bins, key=bin_low_edge)
     ud_list = [pt_bins[key] for key in pt_list]
@@ -66,34 +66,34 @@ def _get_pt_xy(eff_group, rej_group, pt_bins, eff, tagger):
     x_err = np.fromiter( ( (u - d) / 2 for d,u in ud_list), dtype='d')
     y_vals = np.ones(len(pt_bins)) * np.NaN
     y_err = np.ones(len(pt_bins)) * np.NaN
-    for bin_num, pt_bin in enumerate(pt_list): 
-        def get_int(group): 
+    for bin_num, pt_bin in enumerate(pt_list):
+        def get_int(group):
             return np.array(group[pt_bin][tagger])[::-1].cumsum()
         eff_array = get_int(eff_group)
         rej_counts = get_int(rej_group)
-        try: 
+        try:
             rej_at_eff, err_at_eff = _get_rejection(
                 eff_array, rej_counts, eff)
             y_vals[bin_num] = rej_at_eff
             y_err[bin_num] = err_at_eff
-        except RejectionCalcError as err: 
+        except RejectionCalcError as err:
             prob = '{} {}: {}\n'.format(tagger, pt_bin, str(err))
             sys.stderr.write(prob)
 
     return x_vals, y_vals, x_err, y_err
 
-def _get_rejection(eff_array, rej_counts, eff): 
+def _get_rejection(eff_array, rej_counts, eff):
     eff_max = eff_array.max()
-    if np.isnan(eff_max): 
+    if np.isnan(eff_max):
         raise RejectionCalcError("nan in efficiency array")
-    if eff_max == 0.0: 
+    if eff_max == 0.0:
         raise RejectionCalcError("max efficiency is zero")
     eff_array /= eff_array.max()
     idx_above_eff, = np.nonzero(eff_array > eff)
     first_idx_above = idx_above_eff.min()
 
     count_at_eff = rej_counts[first_idx_above]
-    if count_at_eff == 0.0: 
+    if count_at_eff == 0.0:
         raise RejectionCalcError("infinite rejection")
     _check_round(eff_array[first_idx_above], eff)
 
@@ -103,15 +103,15 @@ def _get_rejection(eff_array, rej_counts, eff):
 
 
 # ===== labeling functions =====
-def tick_format(x, pos): 
-    base = math.floor(math.log10(x)) 
-    if x / 10**base > 5: 
+def tick_format(x, pos):
+    base = math.floor(math.log10(x))
+    if x / 10**base > 5:
         return ''
     else:
         return '{:.0f}'.format(x)
 
 _label_alias = {'t':r'\tau'}
-def rej_label(rej_flavor, eff): 
+def rej_label(rej_flavor, eff):
     lowered = rej_flavor.lower()
     flavor_label = _label_alias.get(lowered, lowered)
     pt1 = '$1/\epsilon_{{ \mathrm{{ {} }} }}$'.format(flavor_label)
@@ -119,10 +119,10 @@ def rej_label(rej_flavor, eff):
     return pt1 + pt2
 
 # ==== exceptions ====
-class RejectionCalcError(StandardError): 
-    def __init__(self, *args): 
+class RejectionCalcError(StandardError):
+    def __init__(self, *args):
         super(RejectionCalcError, self).__init__(*args)
 
-class RoundoffError(RejectionCalcError): 
-    def __init__(self, *args): 
+class RoundoffError(RejectionCalcError):
+    def __init__(self, *args):
         super(RoundoffError, self).__init__(*args)
