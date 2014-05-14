@@ -11,11 +11,14 @@ import matplotlib.pyplot as plt
 from os.path import isdir
 import os
 
-def make_plots(in_file_name, out_dir, ext):
-    bl = 'gaiaGr1'
+def make_plots(in_file_name, out_dir, ext, propaganda=False, subset=None):
+    bl = 'mv1' if propaganda else 'gaiaGr1'
+    ext_args = dict(
+        propaganda=propaganda, baseline=bl, ext=ext, out_dir=out_dir,
+        subset=subset)
     with h5py.File(in_file_name, 'r') as in_file:
-        draw_btag_roc(in_file, out_dir, ext=ext, baseline=bl, flavor='U')
-        draw_btag_roc(in_file, out_dir, ext=ext, baseline=bl, flavor='C')
+        draw_btag_roc(in_file, flavor='U', **ext_args)
+        draw_btag_roc(in_file, flavor='C', **ext_args)
 
 def _get_datasets(in_file, tagger, flavor='B'):
     b_ds = in_file['B/btag/all/{}'.format(tagger)]
@@ -35,7 +38,7 @@ def _setup_ratio(ra):
     ra.grid(axis='y')
 
 def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf',
-                  baseline=None, flavor='U'):
+                  baseline=None, flavor='U', propaganda=False, subset=None):
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     grid = GridSpec(2,1, height_ratios=[3,1])
@@ -44,9 +47,10 @@ def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf',
 
     _setup_ax(ax)
     _setup_ratio(ra)
-    ra.set_ylabel('X / {}'.format(baseline))
+    bname = tagschema.display_name(baseline) if propaganda else baseline
+    ra.set_ylabel('X / {}'.format(bname))
 
-    taggers = tagschema.get_taggers(in_file)
+    taggers = tagschema.get_taggers(in_file, subset)
     base_x = None
 
     def get_xy(tagger):
@@ -57,11 +61,12 @@ def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf',
     for tagger in taggers:
         x_pts, y_pts = get_xy(tagger)
         valid_eff = x_pts > min_eff
+        tname = tagschema.display_name(tagger) if propaganda else tagger
         with tagschema.ColorScheme('colors.yml') as colors:
-            color = colors[tagger]
+            color = colors[tname]
         valid_x = x_pts[valid_eff]
         valid_y = y_pts[valid_eff]
-        ax.plot(valid_x, valid_y, '-', label=tagger, color=color)
+        ax.plot(valid_x, valid_y, '-', label=tname, color=color)
         if base_x is not None and tagger != baseline:
             interp_y = np.interp(valid_x, base_x, base_y)
             ra.plot(valid_x, valid_y / interp_y, color=color)

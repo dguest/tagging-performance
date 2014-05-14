@@ -19,6 +19,7 @@ def run():
         choices=fdict.keys(), default='all')
     parser.add_argument(
         '-t', '--taggers', help='only plot a subset of b-taggers', nargs='+')
+    parser.add_argument('--propaganda', action='store_true')
     args = parser.parse_args(sys.argv[1:])
 
     if args.plots == 'all':
@@ -45,14 +46,15 @@ def ctag(args):
 def roc(args):
     from tagperf import tagroc
     print('making roc plots')
-    tagroc.make_plots(args.hdf_file, args.out_dir, args.ext)
+    tagroc.make_plots(args.hdf_file, args.out_dir, args.ext,
+                      propaganda=args.propaganda, subset=args.taggers)
 
 @name('pt')
 def pt(args):
     from tagperf import tagpt
     print('making pt plots')
     tagpt.make_plots(args.hdf_file, args.out_dir, args.ext,
-                     subset=args.taggers)
+                     subset=args.taggers, propaganda=args.propaganda)
 
 if __name__ == '__main__':
     run()

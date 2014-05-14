@@ -11,17 +11,18 @@ import os, sys
 import math
 import warnings
 
-def make_plots(in_file_name, out_dir, ext, subset=None):
+def make_plots(in_file_name, out_dir, ext, subset=None, propaganda=False):
     if not isdir(out_dir):
         os.mkdir(out_dir)
     with h5py.File(in_file_name, 'r') as in_file:
         for eff in [0.6, 0.7, 0.8]:
             for rej_flavor in 'UCT':
-                draw_pt_bins(in_file, out_dir, rej_flavor=rej_flavor,
-                             eff=eff, ext=ext, subset=subset)
+                draw_pt_bins(
+                    in_file, out_dir, rej_flavor=rej_flavor,
+                    eff=eff, ext=ext, subset=subset, propaganda=propaganda)
 
 def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf',
-                 subset=None):
+                 subset=None, propaganda=False):
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
@@ -33,10 +34,11 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf',
         rej_group = in_file['{}/btag/ptBins'.format(rej_flavor.upper())]
         x_vals, y_vals, x_err, y_err = _get_pt_xy(
             eff_group, rej_group, pt_bins, eff, tagger=tagger)
+        tname = tagschema.display_name(tagger) if propaganda else tagger
         with tagschema.ColorScheme('colors.yml') as colors:
             ax.errorbar(
-                x_vals, y_vals, label=tagger, #xerr=x_err,
-                yerr=y_err, color=colors[tagger])
+                x_vals, y_vals, label=tname, #xerr=x_err,
+                yerr=y_err, color=colors[tname])
     ax.legend(numpoints=1, loc='upper left')
     ax.set_xlim(20, np.max(x_vals) * 1.1)
     ax.set_xlabel('$p_{\mathrm{T}}$ [GeV]', x=0.98, ha='right')

@@ -11,6 +11,13 @@ except ImportError:
 
 from os.path import isfile
 
+def display_name(name):
+    if name.startswith('mv'):
+        return 'MV' + name[2:]
+    if name.lower().startswith('gaia'):
+        return 'GAIA'
+    return name
+
 class ColorScheme(dict):
     """
     Keeps track of / assigns colors for the taggers.
@@ -32,7 +39,7 @@ class ColorScheme(dict):
             if not opts:
                 raise KeyError("ran out of color keys")
             val = next(iter(opts))
-            super(ColorScheme,self).__setitem__(key, val)
+            super(ColorScheme,self).__setitem__(str(key), val)
             return val
         return super(ColorScheme,self).__getitem__(key)
     def write(self, fname):
