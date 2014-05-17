@@ -51,6 +51,7 @@ private:
   Histogram* m_jfc;
   Histogram* m_jfit;
   Histogram* m_gaia_c;
+  Histogram* m_fabtag;
 };
 
 class FlavoredHists {

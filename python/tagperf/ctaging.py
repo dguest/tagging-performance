@@ -21,6 +21,7 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
             _make_rejrej(in_file, out_file, tagger='gaia')
             _make_rejrej(in_file, out_file, tagger='jfc')
             _make_rejrej(in_file, out_file, tagger='jfit')
+            _make_rejrej(in_file, out_file, tagger='fabtag')
 
     if not isdir(out_dir):
         os.mkdir(out_dir)
@@ -31,6 +32,8 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         draw_ctag_ratio(cache, out_dir, ext)
         draw_ctag_ratio(cache, out_dir, ext, tagger='jfit',
                         tagger_disp='COMBNN', vmax=1.9)
+        draw_ctag_ratio(cache, out_dir, ext, tagger='fabtag',
+                        tagger_disp='MV1-MV1c', vmax=1.9)
         draw_simple_rejrej(cache, out_dir, ext)
         #draw_xkcd_rejrej(cache, out_dir, ext)
         with h5py.File(in_file_name, 'r') as in_file:
@@ -273,7 +276,6 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf'):
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ds = in_file['gaia/all']
-    ds_denom = in_file['jfc/all']
 
     ax.set_xscale('log')
     ax.set_yscale('log')

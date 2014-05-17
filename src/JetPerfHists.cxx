@@ -105,6 +105,12 @@ CtagHists::CtagHists() :
   m_jfc = new Histogram({gaia_anti_u, gaia_anti_b}, hflag);
   m_jfit = new Histogram({gaia_anti_u, gaia_anti_b}, hflag);
   m_gaia_c = new Histogram(N_BINS, 0.0, 1.0, "", hflag);
+
+  // The (obviously terrible) combination of MV1 and MV1c
+  m_fabtag = new Histogram({
+      { "mv1" , N_2AX_BINS, 0.0, 1.0},
+      { "mv1c", N_2AX_BINS, 0.0, 1.0}
+    });
 }
 
 CtagHists::~CtagHists() {
@@ -112,6 +118,7 @@ CtagHists::~CtagHists() {
   delete m_jfc;
   delete m_jfit;
   delete m_gaia_c;
+  delete m_fabtag;
 }
 
 void CtagHists::fill(const Jet& jet, double weight) {
@@ -119,6 +126,10 @@ void CtagHists::fill(const Jet& jet, double weight) {
   m_jfc->fill({ctagAntiU(jet.jfc), ctagAntiB(jet.jfc)}, weight);
   m_jfit->fill({ctagAntiU(jet.jfit), ctagAntiB(jet.jfit)}, weight);
   m_gaia_c->fill(jet.gaia.pc, weight);
+
+  // use (1 - mv1c) to select c and light jets. Then use mv1 to remove
+  // the light jets.
+  m_fabtag->fill({jet.mv1, 1.0 - jet.mv1c}, weight);
 }
 
 void CtagHists::writeTo(H5::CommonFG& fg) {
@@ -126,6 +137,7 @@ void CtagHists::writeTo(H5::CommonFG& fg) {
   m_jfc->write_to(fg, "jfc");
   m_jfit->write_to(fg, "jfit");
   m_gaia_c->write_to(fg, "gaiaC");
+  m_fabtag->write_to(fg, "fabtag");
 }
 
 
