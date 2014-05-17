@@ -13,7 +13,7 @@ def run():
         '-e', '--ext', help='plot extension (default %(default)s)',
         default='.pdf')
 
-    fdict = {f.name: f for f in [ctag, roc, pt]}
+    fdict = {f.name: f for f in [ctag, roc, pt, c1d]}
     parser.add_argument(
         '-p', '--plots', help='plots to make (default %(default)s)',
         choices=fdict.keys(), default='all')
@@ -41,6 +41,12 @@ def ctag(args):
     print('making ctag plots')
     ctaging.make_plots(args.hdf_file, 'REJREJ_CACHE.h5', args.out_dir,
                         args.ext)
+
+@name('c1d')
+def c1d(args):
+    from tagperf import ctaging
+    print('making ctag 1d plots')
+    ctaging.make_1d_plots(args.hdf_file, args.out_dir, args.ext)
 
 @name('roc')
 def roc(args):

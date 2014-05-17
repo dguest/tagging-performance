@@ -12,6 +12,9 @@ from matplotlib.colorbar import Colorbar
 from matplotlib.ticker import FuncFormatter
 from matplotlib.lines import Line2D
 
+# __________________________________________________________________________
+# top level functions
+
 def make_plots(in_file_name, cache_name, out_dir, ext):
     """
     Top level routine to make plots from tagger output distributions
@@ -39,6 +42,39 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         with h5py.File(in_file_name, 'r') as in_file:
             draw_cprob_rejrej(cache, in_file, out_dir, ext)
 
+_leg_labels = {
+    'gaia':'GAIA', 'fabtag':'MV1 + MV1c', 'jfc':'JetFitterCharm',
+    'jfit':'JetFitterCOMBNN'
+}
+def make_1d_plots(in_file_name, out_dir, ext):
+    b_eff = 0.1
+    taggers = {}
+    with h5py.File(in_file_name, 'r') as in_file:
+        for tag in ['gaia', 'fabtag', 'jfc', 'jfit']:
+            taggers[tag] = _get_c_vs_u_eff_const_beff(
+                in_file, tag, b_eff=b_eff)
+
+    fig = Figure(figsize=(8,6))
+    canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(1,1,1)
+    ax.set_yscale('log')
+    for tname, (vc, vu) in taggers.iteritems():
+        ax.plot(vc, vu, label=_leg_labels.get(tname, tname))
+    ax.legend(title='$b$-rejection = {}'.format(1/b_eff))
+    ax.set_xlabel('$c$ efficiency', x=0.98, ha='right')
+    ax.set_ylabel('light rejection', y=0.98, va='top')
+    ax.grid(which='both')
+
+    fig.tight_layout(pad=0, h_pad=0, w_pad=0)
+    if not isdir(out_dir):
+        os.mkdir(out_dir)
+    file_name = '{}/ctag-brej{}{}'.format(out_dir, int(10.0/b_eff), ext)
+    canvas.print_figure(file_name, bbox_inches='tight')
+
+
+# _________________________________________________________________________
+# common utility functions
+
 def _get_hist_name(flavor, tagger, binning):
     return '{}/ctag/{}/{}'.format(flavor, binning, tagger)
 
@@ -56,6 +92,9 @@ def _get_rej_hist(int_counts):
 
 def _get_eff_hist(int_counts):
     return int_counts / int_counts.max()
+
+# __________________________________________________________________________
+# 'plumbing' level routines to calculate the things we'll later plot
 
 def _make_rejrej(in_file, out_file, tagger='gaia', binning='all'):
     """
@@ -142,8 +181,32 @@ class RejRejComp(object):
                 out_array[x, y] = max(z, out_array[x, y])
         return out_array
 
+def _get_c_vs_u_eff_const_beff(in_file, tagger, b_eff=0.1, binning='all'):
+    """
+    Returns (c efficiency, light rejection) tuple for a given b-tagging
+    efficiency.
+    """
+    def make_int_flavor(flavor):
+        ds = in_file[_get_hist_name(flavor, tagger=tagger, binning=binning)]
+        return np.array(ds)[::-1,::-1].cumsum(axis=0).cumsum(axis=1)
 
-# ============= drawing routines ===========
+    eff_flavor = {
+        flav: _get_eff_hist(make_int_flavor(flav)) for flav in 'BCU'}
+
+    # --- Here be the meat ---
+    # the 'anti-b' cut is along the second axis. The index of the first
+    # passing value above the efficiency threshold is the same as the
+    # number of points that are below the threshold.
+    first_passing_index = np.sum(eff_flavor['B'] < b_eff, axis=1)
+    ll, lb = eff_flavor['B'].shape
+    u_idx = np.arange(ll)
+    b_idx = np.minimum(first_passing_index, lb - 1)
+    ceffs = eff_flavor['C'][u_idx, b_idx]
+    leffs = eff_flavor['U'][u_idx, b_idx]
+    return ceffs, 1 / leffs
+
+# __________________________________________________________________________
+# drawing routines
 
 def draw_ctag_rejrej_slow(in_file, out_dir, ext='.pdf'):
     """
@@ -330,7 +393,8 @@ def draw_cprob_rejrej(in_file, in_file_up, out_dir, ext='.pdf'):
     out_name = '{}/rejrej-cprob{}'.format(out_dir, ext)
     canvas.print_figure(out_name, bbox_inches='tight')
 
-# =========== draw utilities ===========
+# __________________________________________________________________________
+# draw utilities
 
 def _add_cprob_curve(ax, in_file, levels):
     """
