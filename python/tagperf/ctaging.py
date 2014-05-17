@@ -37,14 +37,18 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
                         tagger_disp='COMBNN', vmax=1.9)
         draw_ctag_ratio(cache, out_dir, ext, tagger='fabtag',
                         tagger_disp='MV1-MV1c', vmax=1.9)
+        draw_ctag_ratio(
+            cache, out_dir, ext, tagger='fabtag', tagger_disp='MV1-MV1c',
+            num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
         draw_simple_rejrej(cache, out_dir, ext)
         #draw_xkcd_rejrej(cache, out_dir, ext)
         with h5py.File(in_file_name, 'r') as in_file:
             draw_cprob_rejrej(cache, in_file, out_dir, ext)
 
-_leg_labels = {
-    'gaia':'GAIA', 'fabtag':'MV1 + MV1c', 'jfc':'JetFitterCharm',
-    'jfit':'JetFitterCOMBNN'
+_leg_labels_colors = {
+    'gaia':('GAIA','red'), 'fabtag':('MV1 + MV1c','blue'),
+    'jfc':('JetFitterCharm','darkgreen'),
+    'jfit':('JetFitterCOMBNN','orange'),
 }
 def make_1d_plots(in_file_name, out_dir, ext):
     b_eff = 0.1
@@ -59,7 +63,8 @@ def make_1d_plots(in_file_name, out_dir, ext):
     ax = fig.add_subplot(1,1,1)
     ax.set_yscale('log')
     for tname, (vc, vu) in taggers.iteritems():
-        ax.plot(vc, vu, label=_leg_labels.get(tname, tname))
+        label, color = _leg_labels_colors.get(tname, (tname, 'k'))
+        ax.plot(vc, vu, label=label, color=color)
     ax.legend(title='$b$-rejection = {}'.format(1/b_eff))
     ax.set_xlabel('$c$ efficiency', x=0.98, ha='right')
     ax.set_ylabel('light rejection', y=0.98, va='top')
@@ -68,7 +73,7 @@ def make_1d_plots(in_file_name, out_dir, ext):
     fig.tight_layout(pad=0, h_pad=0, w_pad=0)
     if not isdir(out_dir):
         os.mkdir(out_dir)
-    file_name = '{}/ctag-brej{}{}'.format(out_dir, int(10.0/b_eff), ext)
+    file_name = '{}/ctag-1d-brej{}{}'.format(out_dir, int(1.0/b_eff), ext)
     canvas.print_figure(file_name, bbox_inches='tight')
 
 
@@ -201,9 +206,11 @@ def _get_c_vs_u_eff_const_beff(in_file, tagger, b_eff=0.1, binning='all'):
     ll, lb = eff_flavor['B'].shape
     u_idx = np.arange(ll)
     b_idx = np.minimum(first_passing_index, lb - 1)
+    beffs = eff_flavor['B'][u_idx, b_idx]
     ceffs = eff_flavor['C'][u_idx, b_idx]
     leffs = eff_flavor['U'][u_idx, b_idx]
-    return ceffs, 1 / leffs
+    valid = np.abs(beffs - b_eff) / b_eff < 0.01
+    return ceffs[valid], 1 / leffs[valid]
 
 # __________________________________________________________________________
 # drawing routines
@@ -271,7 +278,8 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts):
       tagger_disp (for display)
       vmax
     """
-    options = {'tagger':'jfc', 'tagger_disp':'JetFitterCharm', 'vmax':1.2}
+    options = {'tagger':'jfc', 'tagger_disp':'JetFitterCharm', 'vmax':1.2,
+               'num_tagger':'gaia', 'num_tagger_disp':None}
     for key, val in opts.items():
         if not key in options:
             raise TypeError("{} not a valid arg".format(key))
@@ -280,7 +288,7 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts):
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
-    ds = in_file['gaia/all']
+    ds = in_file['{}/all'.format(options['num_tagger'])]
     ds_denom = in_file['{}/all'.format(options['tagger'])]
 
     eff_array, extent = _get_arr_extent(ds)
@@ -296,15 +304,16 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts):
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cb = Colorbar(ax=cax, mappable=im)
-    cb.set_label('$\epsilon_{{c}}$ ratio (GAIA / {})'.format(
+    cb.set_label('$\epsilon_{{c}}$ ratio ({} / {})'.format(
+            options['num_tagger_disp'] or options['num_tagger'].upper(),
             options['tagger_disp']))
 
     _label_axes(ax, ds)
     _add_eq_contour(ax, ds, ds_denom, colorbar=cb)
     _add_contour(ax,ds)
 
-    out_name = '{}/rejrej-ratio-{}{}'.format(
-        out_dir, options['tagger'], ext)
+    out_name = '{}/ctag-2d-{}-vs-{}{}'.format(
+        out_dir, options['num_tagger'], options['tagger'], ext)
     # ignore complaints about not being able to log scale images
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
