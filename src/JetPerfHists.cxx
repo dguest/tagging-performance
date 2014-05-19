@@ -137,7 +137,7 @@ void CtagHists::writeTo(H5::CommonFG& fg) {
   m_jfc->write_to(fg, "jfc");
   m_jfit->write_to(fg, "jfit");
   m_gaia_c->write_to(fg, "gaiaC");
-  m_fabtag->write_to(fg, "fabtag");
+  m_fabtag->write_to(fg, "mv");
 }
 
 

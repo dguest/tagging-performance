@@ -11,6 +11,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.colorbar import Colorbar
 from matplotlib.ticker import FuncFormatter
 from matplotlib.lines import Line2D
+from matplotlib.legend import Legend
 
 # __________________________________________________________________________
 # top level functions
@@ -36,7 +37,7 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         draw_ctag_ratio(cache, out_dir, ext, tagger='jfit',
                         tagger_disp='COMBNN', vmax=1.9)
         draw_ctag_ratio(cache, out_dir, ext, tagger='fabtag',
-                        tagger_disp='MV1-MV1c', vmax=1.9)
+                        tagger_disp='MV1 + MV1c', vmax=1.9)
         draw_ctag_ratio(
             cache, out_dir, ext, tagger='fabtag', tagger_disp='MV1-MV1c',
             num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
@@ -50,6 +51,7 @@ _leg_labels_colors = {
     'jfc':('JetFitterCharm','darkgreen'),
     'jfit':('JetFitterCOMBNN','orange'),
 }
+_text_size = 16
 def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1):
     textsize=16
     taggers = {}
@@ -61,17 +63,14 @@ def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1):
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
-    ax.set_yscale('log')
     for tname, (vc, vu) in taggers.iteritems():
         label, color = _leg_labels_colors.get(tname, (tname, 'k'))
         ax.plot(vc, vu, label=label, color=color, linewidth=2)
     leg = ax.legend(title='$b$-rejection = {}'.format(1/b_eff),
                     prop={'size':textsize})
     leg.get_title().set_fontsize(textsize)
-    ax.set_xlabel('$c$ efficiency', x=0.98, ha='right', size=textsize)
-    ax.set_ylabel('light rejection', y=0.98, va='top', size=textsize)
-    ax.tick_params(labelsize=textsize)
-    ax.grid(which='both')
+
+    _setup_1d_ctag_legs(ax, textsize)
 
     fig.tight_layout(pad=0, h_pad=0, w_pad=0)
     if not isdir(out_dir):
@@ -79,9 +78,50 @@ def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1):
     file_name = '{}/ctag-1d-brej{}{}'.format(out_dir, int(1.0/b_eff), ext)
     canvas.print_figure(file_name, bbox_inches='tight')
 
+_b_eff_styles = ['solid','dashed','dotted']
+def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
+    textsize = _text_size
+    b_eff_styles = _b_eff_styles
+
+    taggers = {x:{} for x in b_effs}
+    with h5py.File(in_file_name, 'r') as in_file:
+        for b_eff in taggers:
+            for tag in ['gaia', 'fabtag']:
+                taggers[b_eff][tag] = _get_c_vs_u_eff_const_beff(
+                    in_file, tag, b_eff=b_eff)
+
+    fig = Figure(figsize=(8,6))
+    canvas = FigureCanvas(fig)
+    ax = fig.add_subplot(1,1,1)
+    for b_eff, linestyle in zip(b_effs, b_eff_styles):
+        for tname, (vc, vu) in taggers[b_eff].iteritems():
+            label, color = _leg_labels_colors.get(tname, (tname, 'k'))
+            lab = '$1 / \epsilon_{{ b }} = $ {rej:.0f}, {tname}'.format(
+                rej=1/b_eff, tname=tname)
+            ax.plot(vc, vu, label=lab, color=color, linewidth=2,
+                    linestyle=linestyle)
+    legprops = {'size':textsize}
+    leg = ax.legend(prop=legprops)
+    leg.get_title().set_fontsize(textsize)
+
+    _setup_1d_ctag_legs(ax, textsize)
+
+    fig.tight_layout(pad=0, h_pad=0, w_pad=0)
+    if not isdir(out_dir):
+        os.mkdir(out_dir)
+    file_name = '{}/ctag-1d-brej-overlay{}'.format(
+        out_dir, ext)
+    canvas.print_figure(file_name, bbox_inches='tight')
 
 # _________________________________________________________________________
 # common utility functions
+
+def _setup_1d_ctag_legs(ax, textsize):
+    ax.set_yscale('log')
+    ax.set_xlabel('$c$ efficiency', x=0.98, ha='right', size=textsize)
+    ax.set_ylabel('light rejection', y=0.98, ha='right', size=textsize)
+    ax.tick_params(labelsize=textsize)
+    ax.grid(which='both')
 
 def _get_hist_name(flavor, tagger, binning):
     return '{}/ctag/{}/{}'.format(flavor, binning, tagger)
@@ -534,7 +574,7 @@ def _label_axes(ax, ds):
     ax.set_xlabel('${}$ rejection'.format(x.lower()),
                   x=0.98, ha='right')
     ax.set_ylabel('${}$ rejection'.format(y.lower()),
-                  y=0.98, va='top')
+                  y=0.98, ha='right')
 
 def _get_arr_extent(ds):
     """
