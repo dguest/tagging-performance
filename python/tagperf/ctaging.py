@@ -324,7 +324,8 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts):
       vmax
     """
     options = {'tagger':'jfc', 'tagger_disp':'JetFitterCharm', 'vmax':1.2,
-               'num_tagger':'gaia', 'num_tagger_disp':None}
+               'num_tagger':'gaia', 'num_tagger_disp':None,
+               'textsize':16}
     for key, val in opts.items():
         if not key in options:
             raise TypeError("{} not a valid arg".format(key))
@@ -342,28 +343,22 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts):
     im = ax.imshow(ratio_array.T, extent=extent,
                    origin='lower', aspect='auto',
                    vmin=1.0, vmax=options['vmax'])
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.grid(which='both')
 
+    textsize = options['textsize']
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cb = Colorbar(ax=cax, mappable=im)
     cb.set_label('$\epsilon_{{c}}$ ratio ({} / {})'.format(
             options['num_tagger_disp'] or options['num_tagger'].upper(),
-            options['tagger_disp']))
+            options['tagger_disp']), size=textsize)
+    cb.ax.tick_params(labelsize=textsize, which='both')
 
-    _label_axes(ax, ds)
+    _label_axes(ax, ds, textsize=textsize)
     _add_eq_contour(ax, ds, ds_denom, colorbar=cb)
-    _add_contour(ax,ds)
-
-    # HACK to rename for tobi, should just rename in the histogram alg
-    den_tname = options['tagger']
-    if den_tname == 'fabtag':
-        den_tname = 'mv'
+    _add_contour(ax,ds, opts=dict(textsize=textsize))
 
     out_name = '{}/ctag-2d-{}-vs-{}{}'.format(
-        out_dir, options['num_tagger'], den_tname, ext)
+        out_dir, options['num_tagger'], options['tagger'], ext)
     # ignore complaints about not being able to log scale images
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -380,9 +375,6 @@ def draw_contour_rejrej(in_file, out_dir, ext='.pdf'):
     ds = in_file['gaia/all']
     ds_denom = in_file['jfc/all']
 
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.grid(which='both')
     _add_eq_contour(ax, ds, ds_denom, levels=[1.05, 1.10, 1.15], smooth=1.0)
     _add_contour(ax, ds)
     _label_axes(ax, ds)
@@ -399,9 +391,6 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf'):
     ax = fig.add_subplot(1,1,1)
     ds = in_file['gaia/all']
 
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.grid(which='both')
     _add_contour(ax, ds, opts=dict(levels=np.arange(0.1, 0.8, 0.05)))
     _label_axes(ax, ds)
 
@@ -420,9 +409,6 @@ def draw_xkcd_rejrej(in_file, out_dir, ext='.pdf'):
         ds = in_file['gaia/all']
         ds_denom = in_file['jfc/all']
 
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        ax.grid(which='both')
         _add_contour(ax, ds, opts=dict(levels=np.arange(0.1, 0.8, 0.05)))
         _label_axes(ax, ds)
 
@@ -441,9 +427,6 @@ def draw_cprob_rejrej(in_file, in_file_up, out_dir, ext='.pdf'):
     ds = in_file['gaia/all']
     ds_denom = in_file['jfc/all']
 
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.grid(which='both')
     levels = np.arange(0.1, 0.8, 0.1)
     _add_contour(ax, ds, opts=dict(levels=levels))
     _add_cprob_curve(ax, in_file_up, levels=levels)
@@ -510,7 +493,8 @@ def _add_contour(ax, ds, opts={}):
         colors = opts.get('color','k'),
         label = 'iso-eff 2D cuts'
         )
-    ax.clabel(ct, fontsize=12, inline=True, fmt = '%.2f')
+    ax.clabel(ct, fontsize=opts.get('textsize',12), inline=True,
+              fmt = '%.2f')
 
 def _smooth(ratio_array, sigma):
     """
@@ -564,7 +548,10 @@ def _tick_format(x, pos):
     else:
         return '{:.0f}'.format(x)
 
-def _label_axes(ax, ds):
+def _label_axes(ax, ds, textsize=16):
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.grid(which='both')
     x, y, z = ds.attrs['xyz']
     formatter = FuncFormatter(_tick_format)
     ax.xaxis.set_minor_formatter(formatter)
@@ -572,9 +559,10 @@ def _label_axes(ax, ds):
     ax.yaxis.set_minor_formatter(formatter)
     ax.yaxis.set_major_formatter(formatter)
     ax.set_xlabel('${}$ rejection'.format(x.lower()),
-                  x=0.98, ha='right')
+                  x=0.98, ha='right', size=textsize)
     ax.set_ylabel('${}$ rejection'.format(y.lower()),
-                  y=0.98, ha='right')
+                  y=0.98, ha='right', size=textsize)
+    ax.tick_params(labelsize=textsize, which='both')
 
 def _get_arr_extent(ds):
     """
