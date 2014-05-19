@@ -46,7 +46,8 @@ def ctag(args):
 def c1d(args):
     from tagperf import ctaging
     print('making ctag 1d plots')
-    ctaging.make_1d_plots(args.hdf_file, args.out_dir, args.ext)
+    ctaging.make_1d_plots(args.hdf_file, args.out_dir, args.ext, b_eff=0.1)
+    ctaging.make_1d_plots(args.hdf_file, args.out_dir, args.ext, b_eff=0.2)
 
 @name('roc')
 def roc(args):

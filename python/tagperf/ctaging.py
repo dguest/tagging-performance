@@ -50,8 +50,8 @@ _leg_labels_colors = {
     'jfc':('JetFitterCharm','darkgreen'),
     'jfit':('JetFitterCOMBNN','orange'),
 }
-def make_1d_plots(in_file_name, out_dir, ext):
-    b_eff = 0.1
+def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1):
+    textsize=16
     taggers = {}
     with h5py.File(in_file_name, 'r') as in_file:
         for tag in ['gaia', 'fabtag', 'jfc', 'jfit']:
@@ -64,10 +64,13 @@ def make_1d_plots(in_file_name, out_dir, ext):
     ax.set_yscale('log')
     for tname, (vc, vu) in taggers.iteritems():
         label, color = _leg_labels_colors.get(tname, (tname, 'k'))
-        ax.plot(vc, vu, label=label, color=color)
-    ax.legend(title='$b$-rejection = {}'.format(1/b_eff))
-    ax.set_xlabel('$c$ efficiency', x=0.98, ha='right')
-    ax.set_ylabel('light rejection', y=0.98, va='top')
+        ax.plot(vc, vu, label=label, color=color, linewidth=2)
+    leg = ax.legend(title='$b$-rejection = {}'.format(1/b_eff),
+                    prop={'size':textsize})
+    leg.get_title().set_fontsize(textsize)
+    ax.set_xlabel('$c$ efficiency', x=0.98, ha='right', size=textsize)
+    ax.set_ylabel('light rejection', y=0.98, va='top', size=textsize)
+    ax.tick_params(labelsize=textsize)
     ax.grid(which='both')
 
     fig.tight_layout(pad=0, h_pad=0, w_pad=0)
@@ -209,7 +212,9 @@ def _get_c_vs_u_eff_const_beff(in_file, tagger, b_eff=0.1, binning='all'):
     beffs = eff_flavor['B'][u_idx, b_idx]
     ceffs = eff_flavor['C'][u_idx, b_idx]
     leffs = eff_flavor['U'][u_idx, b_idx]
-    valid = np.abs(beffs - b_eff) / b_eff < 0.01
+    # to remove points with lower efficiency than the previous point
+    c_max = np.maximum.accumulate(ceffs)
+    valid = (np.abs(beffs - b_eff) / b_eff < 0.01) & (ceffs == c_max)
     return ceffs[valid], 1 / leffs[valid]
 
 # __________________________________________________________________________
@@ -312,8 +317,13 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts):
     _add_eq_contour(ax, ds, ds_denom, colorbar=cb)
     _add_contour(ax,ds)
 
+    # HACK to rename for tobi, should just rename in the histogram alg
+    den_tname = options['tagger']
+    if den_tname == 'fabtag':
+        den_tname = 'mv'
+
     out_name = '{}/ctag-2d-{}-vs-{}{}'.format(
-        out_dir, options['num_tagger'], options['tagger'], ext)
+        out_dir, options['num_tagger'], den_tname, ext)
     # ignore complaints about not being able to log scale images
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -521,10 +531,10 @@ def _label_axes(ax, ds):
     ax.xaxis.set_major_formatter(formatter)
     ax.yaxis.set_minor_formatter(formatter)
     ax.yaxis.set_major_formatter(formatter)
-    ax.set_xlabel('$1 / \epsilon_{{ {} }}$'.format(x.lower()),
+    ax.set_xlabel('${}$ rejection'.format(x.lower()),
                   x=0.98, ha='right')
-    ax.set_ylabel('$1 / \epsilon_{{ {} }}$'.format(y.lower()),
-                  y=0.98, ha='right')
+    ax.set_ylabel('${}$ rejection'.format(y.lower()),
+                  y=0.98, va='top')
 
 def _get_arr_extent(ds):
     """
