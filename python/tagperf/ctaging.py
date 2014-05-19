@@ -16,6 +16,8 @@ from matplotlib.legend import Legend
 # __________________________________________________________________________
 # top level functions
 
+_mv1uc_name = 'mv'
+_mv1uc_disp = 'MV1 + MV1c'
 def make_plots(in_file_name, cache_name, out_dir, ext):
     """
     Top level routine to make plots from tagger output distributions
@@ -25,7 +27,7 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
             _make_rejrej(in_file, out_file, tagger='gaia')
             _make_rejrej(in_file, out_file, tagger='jfc')
             _make_rejrej(in_file, out_file, tagger='jfit')
-            _make_rejrej(in_file, out_file, tagger='fabtag')
+            _make_rejrej(in_file, out_file, tagger=_mv1uc_name)
 
     if not isdir(out_dir):
         os.mkdir(out_dir)
@@ -36,10 +38,11 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         draw_ctag_ratio(cache, out_dir, ext)
         draw_ctag_ratio(cache, out_dir, ext, tagger='jfit',
                         tagger_disp='COMBNN', vmax=1.9)
-        draw_ctag_ratio(cache, out_dir, ext, tagger='fabtag',
-                        tagger_disp='MV1 + MV1c', vmax=1.9)
+        draw_ctag_ratio(cache, out_dir, ext, tagger=_mv1uc_name,
+                        tagger_disp=_mv1uc_disp, vmax=1.9)
         draw_ctag_ratio(
-            cache, out_dir, ext, tagger='fabtag', tagger_disp='MV1-MV1c',
+            cache, out_dir, ext, tagger=_mv1uc_name,
+            tagger_disp=_mv1uc_disp,
             num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
         draw_simple_rejrej(cache, out_dir, ext)
         #draw_xkcd_rejrej(cache, out_dir, ext)
@@ -47,7 +50,7 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
             draw_cprob_rejrej(cache, in_file, out_dir, ext)
 
 _leg_labels_colors = {
-    'gaia':('GAIA','red'), 'fabtag':('MV1 + MV1c','blue'),
+    'gaia':('GAIA','red'), _mv1uc_name:(_mv1uc_disp,'blue'),
     'jfc':('JetFitterCharm','darkgreen'),
     'jfit':('JetFitterCOMBNN','orange'),
 }
@@ -56,7 +59,7 @@ def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1):
     textsize=16
     taggers = {}
     with h5py.File(in_file_name, 'r') as in_file:
-        for tag in ['gaia', 'fabtag', 'jfc', 'jfit']:
+        for tag in ['gaia', _mv1uc_name, 'jfc', 'jfit']:
             taggers[tag] = _get_c_vs_u_eff_const_beff(
                 in_file, tag, b_eff=b_eff)
 
@@ -86,7 +89,7 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
     taggers = {x:{} for x in b_effs}
     with h5py.File(in_file_name, 'r') as in_file:
         for b_eff in taggers:
-            for tag in ['gaia', 'fabtag']:
+            for tag in ['gaia', _mv1uc_name]:
                 taggers[b_eff][tag] = _get_c_vs_u_eff_const_beff(
                     in_file, tag, b_eff=b_eff)
 
@@ -97,7 +100,7 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
         for tname, (vc, vu) in taggers[b_eff].iteritems():
             label, color = _leg_labels_colors.get(tname, (tname, 'k'))
             lab = '$1 / \epsilon_{{ b }} = $ {rej:.0f}, {tname}'.format(
-                rej=1/b_eff, tname=tname)
+                rej=1/b_eff, tname=label)
             ax.plot(vc, vu, label=lab, color=color, linewidth=2,
                     linestyle=linestyle)
     legprops = {'size':textsize}
@@ -119,7 +122,8 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
 def _setup_1d_ctag_legs(ax, textsize):
     ax.set_yscale('log')
     ax.set_xlabel('$c$ efficiency', x=0.98, ha='right', size=textsize)
-    ax.set_ylabel('light rejection', y=0.98, ha='right', size=textsize)
+    ax.set_ylabel(r'light rejection $\equiv 1 / \epsilon_{\rm light}$',
+                  y=0.98, ha='right', size=textsize)
     ax.tick_params(labelsize=textsize)
     ax.grid(which='both')
 
