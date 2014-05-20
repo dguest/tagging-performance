@@ -25,28 +25,31 @@ def _get_datasets(in_file, tagger, flavor='B'):
     u_ds = in_file['{}/btag/all/{}'.format(flavor, tagger)]
     return b_ds, u_ds
 
-def _setup_ax(ax):
+def _setup_ax(ax, textsize=16):
     ax.set_yscale('log')
     ax.grid(which='both')
+    ax.tick_params(labelsize=textsize, which='both')
 
-def _setup_ratio(ra):
+def _setup_ratio(ra, textsize=16):
     locator = MaxNLocator(5, prune='upper')
     ra.get_yaxis().set_major_locator(locator)
-    ra.set_xlabel('$\epsilon_{b}$', x=0.98, ha='right')
+    ra.set_xlabel('$\epsilon_{b}$', x=0.98, ha='right', size=textsize)
     ra.axhline(y=1, linestyle='-.', color='k')
     ra.set_ylim(0.4, 1.6)
     ra.grid(axis='y')
+    ra.tick_params(labelsize=textsize, which='both')
 
 def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf',
                   baseline=None, flavor='U', propaganda=False, subset=None):
+    textsize = 16
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     grid = GridSpec(2,1, height_ratios=[3,1])
     ax = fig.add_subplot(grid[0])
     ra = fig.add_subplot(grid[1],sharex=ax)
 
-    _setup_ax(ax)
-    _setup_ratio(ra)
+    _setup_ax(ax, textsize)
+    _setup_ratio(ra, textsize)
     bname = tagschema.display_name(baseline) if propaganda else baseline
     ra.set_ylabel('X / {}'.format(bname))
 
@@ -75,8 +78,10 @@ def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf',
     ax.legend()
     ax.set_xlim(min_eff, 1.0)
     ax.set_ylabel('$1/\epsilon_{{ {} }}$'.format(flavor.lower()),
-                  y=0.98, ha='right')
-    plt.setp(ax.get_xticklabels(), visible=False)
+                  y=0.98, ha='right', size=textsize)
+    # plt.setp(ax.get_xticklabels(), visible=False)
+    for tk in ax.get_xticklabels():
+        tk.set_visible(False)
     fig.tight_layout(pad=0, h_pad=0, w_pad=0)
     file_name = '{}/{}RejRoc{}'.format(out_dir, flavor.lower(), ext)
     canvas.print_figure(file_name, bbox_inches='tight')

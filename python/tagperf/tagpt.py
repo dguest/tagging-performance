@@ -22,7 +22,7 @@ def make_plots(in_file_name, out_dir, ext, subset=None, propaganda=False):
                     eff=eff, ext=ext, subset=subset, propaganda=propaganda)
 
 def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf',
-                 subset=None, propaganda=False):
+                 subset=None, propaganda=False, textsize=16):
     fig = Figure(figsize=(8,6))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
@@ -41,11 +41,14 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf',
                 yerr=y_err, color=colors[tname])
     ax.legend(numpoints=1, loc='upper left')
     ax.set_xlim(20, np.max(x_vals) * 1.1)
-    ax.set_xlabel('$p_{\mathrm{T}}$ [GeV]', x=0.98, ha='right')
-    ax.set_ylabel(rej_label(rej_flavor, eff), y=0.98, ha='right')
+    ax.set_xlabel('$p_{\mathrm{T}}$ [GeV]', x=0.98, ha='right',
+                  size=textsize)
+    ax.set_ylabel(rej_label(rej_flavor, eff), y=0.98, ha='right',
+                  size=textsize)
     x_formatter = FuncFormatter(tick_format)
     ax.xaxis.set_minor_formatter(x_formatter)
     ax.xaxis.set_major_formatter(x_formatter)
+    ax.tick_params(labelsize=textsize, which='both')
     out_name = '{}/{}Rej{}_ptbins{}'.format(
         out_dir, rej_flavor.lower(), int(eff*100), ext)
     canvas.print_figure(out_name, bbox_inches='tight')
