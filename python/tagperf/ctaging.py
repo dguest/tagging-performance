@@ -13,6 +13,12 @@ from matplotlib.ticker import FuncFormatter
 from matplotlib.lines import Line2D
 from matplotlib.legend import Legend
 
+_text_size = 12
+_fig_edge = 5.0
+_fig_size = (_fig_edge, _fig_edge * 3/4)
+_square_fig_size = (_fig_edge, _fig_edge)
+_line_width = 1.8
+
 # __________________________________________________________________________
 # top level functions
 
@@ -54,21 +60,20 @@ _leg_labels_colors = {
     'jfc':('JetFitterCharm','darkgreen'),
     'jfit':('JetFitterCOMBNN','orange'),
 }
-_text_size = 16
 def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1):
-    textsize=16
+    textsize=_text_size
     taggers = {}
     with h5py.File(in_file_name, 'r') as in_file:
         for tag in ['gaia', _mv1uc_name, 'jfc', 'jfit']:
             taggers[tag] = _get_c_vs_u_eff_const_beff(
                 in_file, tag, b_eff=b_eff)
 
-    fig = Figure(figsize=(8,6))
+    fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     for tname, (vc, vu) in taggers.iteritems():
         label, color = _leg_labels_colors.get(tname, (tname, 'k'))
-        ax.plot(vc, vu, label=label, color=color, linewidth=2)
+        ax.plot(vc, vu, label=label, color=color, linewidth=_line_width)
     leg = ax.legend(title='$b$-rejection = {}'.format(1/b_eff),
                     prop={'size':textsize})
     leg.get_title().set_fontsize(textsize)
@@ -93,7 +98,7 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
                 taggers[b_eff][tag] = _get_c_vs_u_eff_const_beff(
                     in_file, tag, b_eff=b_eff)
 
-    fig = Figure(figsize=(8,6))
+    fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     for b_eff, linestyle in zip(b_effs, b_eff_styles):
@@ -101,7 +106,7 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
             label, color = _leg_labels_colors.get(tname, (tname, 'k'))
             lab = '$1 / \epsilon_{{ b }} = $ {rej:.0f}, {tname}'.format(
                 rej=1/b_eff, tname=label)
-            ax.plot(vc, vu, label=lab, color=color, linewidth=2,
+            ax.plot(vc, vu, label=lab, color=color, linewidth=_line_width,
                     linestyle=linestyle)
     legprops = {'size':textsize}
     leg = ax.legend(prop=legprops)
@@ -268,7 +273,7 @@ def draw_ctag_rejrej_slow(in_file, out_dir, ext='.pdf'):
     """
     Slow because it uses pcolormesh.
     """
-    fig = Figure(figsize=(8,6))
+    fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ds = in_file['gaia/all']
@@ -292,7 +297,7 @@ def draw_ctag_rejrej(in_file, out_dir, ext='.pdf'):
     """
     Basic heatmap of efficiency vs two rejections.
     """
-    fig = Figure(figsize=(8,6))
+    fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ds = in_file['gaia/all']
@@ -329,13 +334,13 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts):
     """
     options = {'tagger':'jfc', 'tagger_disp':'JetFitterCharm', 'vmax':1.2,
                'num_tagger':'gaia', 'num_tagger_disp':None,
-               'textsize':16}
+               'textsize':_text_size}
     for key, val in opts.items():
         if not key in options:
             raise TypeError("{} not a valid arg".format(key))
         options[key] = val
 
-    fig = Figure(figsize=(8,6))
+    fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ds = in_file['{}/all'.format(options['num_tagger'])]
@@ -373,7 +378,7 @@ def draw_contour_rejrej(in_file, out_dir, ext='.pdf'):
     Compare efficiency of two taggers. Draw one set of contours for the
     numerator tagger, another set for the ratio between the two taggers.
     """
-    fig = Figure(figsize=(8,6))
+    fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ds = in_file['gaia/all']
@@ -390,7 +395,7 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf'):
     """
     Draw iso-efficiency contours for one tagger (no colors).
     """
-    fig = Figure(figsize=(8,6))
+    fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ds = in_file['gaia/all']
@@ -407,7 +412,7 @@ def draw_xkcd_rejrej(in_file, out_dir, ext='.pdf'):
     """
     import matplotlib.pyplot as plt
     with plt.xkcd():
-        fig = Figure(figsize=(8,6))
+        fig = Figure(figsize=_fig_size)
         canvas = FigureCanvas(fig)
         ax = fig.add_subplot(1,1,1)
         ds = in_file['gaia/all']
@@ -425,7 +430,7 @@ def draw_cprob_rejrej(in_file, in_file_up, out_dir, ext='.pdf'):
     Map of iso-efficiency contours, with an overlay for the rejections
     of a 1d cut.
     """
-    fig = Figure(figsize=(8,6))
+    fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ds = in_file['gaia/all']
@@ -459,7 +464,8 @@ def _add_cprob_curve(ax, in_file, levels):
     c_eff = c_eff_all[useful_eff]
     b_rej = b_int.max() / b_int[useful_eff]
     u_rej = u_int.max() / u_int[useful_eff]
-    ax.plot(b_rej, u_rej, '--r', linewidth=2, label='gaia 1D $p_{c}$')
+    ax.plot(b_rej, u_rej, '--r', linewidth=_line_width,
+            label='gaia 1D $p_{c}$')
     b_rej_pts = []
     u_rej_pts = []
     for eff in levels:
@@ -472,7 +478,7 @@ def _add_cprob_curve(ax, in_file, levels):
         ax.text(b_pt, u_pt, str(eff), color='r', ha='left', va='bottom')
     ax.plot(b_rej_pts, u_rej_pts, 'or')
     handles, labels = ax.get_legend_handles_labels()
-    handles.append(Line2D([0,1],[0,0], linewidth=2, color='k'))
+    handles.append(Line2D([0,1],[0,0], linewidth=_line_width, color='k'))
     labels.append('gaia 2D, iso-eff')
     ax.legend(reversed(handles), reversed(labels), numpoints=1)
 
@@ -492,12 +498,12 @@ def _add_contour(ax, ds, opts={}):
     c_lines = np.arange(0.1, 0.65, 0.05)
     ct = ax.contour(xgrid, ygrid,
         eff_array.T,
-        linewidths = 2,
+        linewidths = _line_width,
         levels = opts.get('levels',c_lines),
         colors = opts.get('color','k'),
         label = 'iso-eff 2D cuts'
         )
-    ax.clabel(ct, fontsize=opts.get('textsize',12), inline=True,
+    ax.clabel(ct, fontsize=opts.get('textsize',_text_size*0.75), inline=True,
               fmt = '%.2f')
 
 def _smooth(ratio_array, sigma):
@@ -533,7 +539,7 @@ def _add_eq_contour(ax, ds, ds_denom, colorbar=None, levels=[], smooth=None):
     ct = ax.contour(
         xgrid, ygrid,
         ratio_array.T,
-        linewidths = 2,
+        linewidths = _line_width,
         levels = [1.0] if not levels else levels,
         colors = ['r','orange','y','green'],
         )
@@ -541,18 +547,18 @@ def _add_eq_contour(ax, ds, ds_denom, colorbar=None, levels=[], smooth=None):
         if value == 1.0:
             return 'equal'
         return '{:+.0%}'.format(value - 1.0)
-    ax.clabel(ct, fontsize=12, inline=True, fmt=fmt)
+    ax.clabel(ct, fontsize=_text_size*0.75, inline=True, fmt=fmt)
     if colorbar:
         colorbar.add_lines(ct)
 
 def _tick_format(x, pos):
     base = math.floor(math.log10(x))
-    if x / 10**base > 5:
+    if x / 10**base > 4:
         return ''
     else:
         return '{:.0f}'.format(x)
 
-def _label_axes(ax, ds, textsize=16):
+def _label_axes(ax, ds, textsize=_text_size):
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.grid(which='both')

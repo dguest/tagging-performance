@@ -11,6 +11,14 @@ import os, sys
 import math
 import warnings
 
+# _fig_size = 6, 4.5
+# _text_size = 12
+
+_text_size = 12
+_fig_edge = 5.0
+_fig_size = (_fig_edge, _fig_edge * 3/4)
+
+
 def make_plots(in_file_name, out_dir, ext, subset=None, propaganda=False):
     if not isdir(out_dir):
         os.mkdir(out_dir)
@@ -22,8 +30,8 @@ def make_plots(in_file_name, out_dir, ext, subset=None, propaganda=False):
                     eff=eff, ext=ext, subset=subset, propaganda=propaganda)
 
 def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf',
-                 subset=None, propaganda=False, textsize=16):
-    fig = Figure(figsize=(8,6))
+                 subset=None, propaganda=False, textsize=_text_size):
+    fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     ax.grid(which='both')
@@ -39,7 +47,8 @@ def draw_pt_bins(in_file, out_dir, eff=0.7, rej_flavor='U', ext='.pdf',
             ax.errorbar(
                 x_vals, y_vals, label=tname, #xerr=x_err,
                 yerr=y_err, color=colors[tname])
-    ax.legend(numpoints=1, loc='upper left')
+    leg = ax.legend(numpoints=1, loc='upper left', prop={'size':textsize})
+    leg.get_title().set_fontsize(textsize)
     ax.set_xlim(20, np.max(x_vals) * 1.1)
     ax.set_xlabel('$p_{\mathrm{T}}$ [GeV]', x=0.98, ha='right',
                   size=textsize)
