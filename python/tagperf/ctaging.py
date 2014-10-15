@@ -71,7 +71,7 @@ def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1):
     fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
-    for tname, (vc, vu) in taggers.iteritems():
+    for tname, (vc, vu) in taggers.items():
         label, color = _leg_labels_colors.get(tname, (tname, 'k'))
         ax.plot(vc, vu, label=label, color=color, linewidth=_line_width)
     leg = ax.legend(title='$b$-rejection = {}'.format(1/b_eff),
@@ -102,7 +102,7 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     for b_eff, linestyle in zip(b_effs, b_eff_styles):
-        for tname, (vc, vu) in taggers[b_eff].iteritems():
+        for tname, (vc, vu) in taggers[b_eff].items():
             label, color = _leg_labels_colors.get(tname, (tname, 'k'))
             lab = '$1 / \epsilon_{{ b }} = $ {rej:.0f}, {tname}'.format(
                 rej=1/b_eff, tname=label)
