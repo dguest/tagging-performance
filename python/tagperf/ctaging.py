@@ -60,13 +60,13 @@ _leg_labels_colors = {
     'jfc':('JetFitterCharm','darkgreen'),
     'jfit':('JetFitterCOMBNN','orange'),
 }
-def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1):
+def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1, reject='U'):
     textsize=_text_size
     taggers = {}
     with h5py.File(in_file_name, 'r') as in_file:
         for tag in ['gaia', _mv1uc_name, 'jfc', 'jfit']:
             taggers[tag] = _get_c_vs_u_eff_const_beff(
-                in_file, tag, b_eff=b_eff)
+                in_file, tag, b_eff=b_eff, reject=reject)
 
     fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
@@ -78,12 +78,13 @@ def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1):
                     prop={'size':textsize})
     leg.get_title().set_fontsize(textsize)
 
-    _setup_1d_ctag_legs(ax, textsize)
+    _setup_1d_ctag_legs(ax, textsize, reject=reject)
 
     fig.tight_layout(pad=0, h_pad=0, w_pad=0)
     if not isdir(out_dir):
         os.mkdir(out_dir)
-    file_name = '{}/ctag-1d-brej{}{}'.format(out_dir, int(1.0/b_eff), ext)
+    file_name = '{}/{rej}Rej-vs-cEff-brej{}{}'.format(
+        out_dir, int(1.0/b_eff), ext, rej=reject.lower())
     canvas.print_figure(file_name, bbox_inches='tight')
 
 _b_eff_styles = ['solid','dashed','dotted']
@@ -124,11 +125,16 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
 # _________________________________________________________________________
 # common utility functions
 
-def _setup_1d_ctag_legs(ax, textsize):
+long_particle_names = {
+    'U': r'{\rm light}', 'T':r'\tau'
+}
+
+def _setup_1d_ctag_legs(ax, textsize, reject='U'):
     ax.set_yscale('log')
     ax.set_xlabel('$c$ efficiency', x=0.98, ha='right', size=textsize)
-    ax.set_ylabel(r'light rejection $\equiv 1 / \epsilon_{\rm light}$',
-                  y=0.98, ha='right', size=textsize)
+    ylab = '${rej}$ rejection $\equiv 1 / \epsilon_{{ {rej} }}$'.format(
+        rej=long_particle_names[reject])
+    ax.set_ylabel(ylab, y=0.98, ha='right', size=textsize)
     ax.tick_params(labelsize=textsize)
     ax.grid(which='both')
 
@@ -238,17 +244,19 @@ class RejRejComp(object):
                 out_array[x, y] = max(z, out_array[x, y])
         return out_array
 
-def _get_c_vs_u_eff_const_beff(in_file, tagger, b_eff=0.1, binning='all'):
+def _get_c_vs_u_eff_const_beff(in_file, tagger, b_eff=0.1, binning='all',
+                               reject='U'):
     """
-    Returns (c efficiency, light rejection) tuple for a given b-tagging
-    efficiency.
+    Returns (c efficiency, X rejection) tuple for a given b-tagging
+    efficiency. By default reject 'U', but can set this.
     """
     def make_int_flavor(flavor):
         ds = in_file[_get_hist_name(flavor, tagger=tagger, binning=binning)]
         return np.array(ds)[::-1,::-1].cumsum(axis=0).cumsum(axis=1)
 
+    flavs = 'BC' + reject
     eff_flavor = {
-        flav: _get_eff_hist(make_int_flavor(flav)) for flav in 'BCU'}
+        flav: _get_eff_hist(make_int_flavor(flav)) for flav in flavs}
 
     # --- Here be the meat ---
     # the 'anti-b' cut is along the second axis. The index of the first
@@ -260,7 +268,7 @@ def _get_c_vs_u_eff_const_beff(in_file, tagger, b_eff=0.1, binning='all'):
     b_idx = np.minimum(first_passing_index, lb - 1)
     beffs = eff_flavor['B'][u_idx, b_idx]
     ceffs = eff_flavor['C'][u_idx, b_idx]
-    leffs = eff_flavor['U'][u_idx, b_idx]
+    leffs = eff_flavor[reject][u_idx, b_idx]
     # to remove points with lower efficiency than the previous point
     c_max = np.maximum.accumulate(ceffs)
     valid = (np.abs(beffs - b_eff) / b_eff < 0.01) & (ceffs == c_max)
