@@ -1,5 +1,6 @@
 #include "Jet.hh"
 #include "TreeBuffer.hh"
+#include "PetersBuffer.hh"
 
 #include <cassert>
 
@@ -11,6 +12,13 @@ TagTriple::TagTriple(const TagVectors& buff, int index):
   pu(buff.pu->at(index)),
   pc(buff.pc->at(index)),
   pb(buff.pb->at(index))
+{
+}
+
+TagTriple::TagTriple(const TagArrays& buff, int index):
+  pu(buff.pu[index]),
+  pc(buff.pc[index]),
+  pb(buff.pb[index])
 {
 }
 
@@ -29,6 +37,7 @@ Jet::Jet(const TreeBuffer& buff, int index) :
   event(buff.entry()),
   pt(buff.jet_pt->at(index)),
   eta(buff.jet_eta->at(index)),
+  jvf(-999),
   valid(true),
   mv1(buff.jet_MV1->at(index)),
   mv1c(buff.jet_MV1c->at(index)),
@@ -42,6 +51,26 @@ Jet::Jet(const TreeBuffer& buff, int index) :
   jfc(buff.jfc, index),
   gaia_valid(buff.jet_gaia_isValid->at(index))
 {
+}
+
+Jet::Jet(const PetersBuffer& buff, int index) :
+  event(buff.entry()),
+  pt(buff.jet_pt[index]),
+  eta(buff.jet_eta[index]),
+  jvf(buff.jvf[index]),
+  valid(true),
+  mv1(-999),
+  mv1c(-999),
+  mv2c00(-999),
+  mv2c10(-999),
+  mv2c20(-999),
+  mvb(-999),
+  truth_label(getFlavor(buff.jet_flavor_truth_label[index])),
+  jfit(buff.jfit, index),
+  jfc(buff.jfc, index),
+  gaia_valid(false)
+{
+  assert(buff.n_jets > index);
 }
 
 Flavor Jet::getFlavor(int ftl) {
