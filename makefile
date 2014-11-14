@@ -61,7 +61,7 @@ LIBS         += $(ROOTLIBS)
 # ---- define objects
 GEN_OBJ     := SmartChain.o JetPerfHists.o Jet.o TreeBuffer.o
 GEN_OBJ     += PetersBuffer.o
-GEN_OBJ     += misc_func.o buildHists.o
+GEN_OBJ     += misc_func.o buildHists.o RunConfig.o
 
 # stuff used for the c++ executable
 STAND_ALONE_OBJ     := $(GEN_OBJ) stand-alone.o

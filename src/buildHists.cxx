@@ -3,6 +3,7 @@
 #include "Jet.hh"
 #include "JetPerfHists.hh"
 #include "misc_func.hh"
+#include "jtag.hh"
 
 #include "H5Cpp.h"
 
