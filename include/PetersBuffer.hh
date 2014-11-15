@@ -7,11 +7,13 @@ class SmartChain;
 #include <vector>
 #include <string>
 
+const int MAX_JETS = 1000;
+
 struct TagArrays {
   void set(SmartChain* chain, std::string prefix);
-  double* pu;
-  double* pc;
-  double* pb;
+  double pu[MAX_JETS];
+  double pc[MAX_JETS];
+  double pb[MAX_JETS];
 };
 
 class PetersBuffer {
@@ -23,10 +25,10 @@ public:
   int entry() const;
   void saveSetBranches(const std::string& file_name);
   int n_jets;
-  double*  jet_pt;
-  double*  jet_eta;
-  double*  jvf;
-  int*  jet_flavor_truth_label;
+  double jet_pt[MAX_JETS];
+  double jet_eta[MAX_JETS];
+  double jvf[MAX_JETS];
+  int jet_flavor_truth_label[MAX_JETS];
   TagArrays jfit;
   TagArrays jfc;
 

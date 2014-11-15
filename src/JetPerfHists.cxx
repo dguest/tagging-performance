@@ -143,7 +143,7 @@ void CtagHists::writeTo(H5::CommonFG& fg) {
 
 // ============ flavored hists ================
 
-FlavoredHists::FlavoredHists():
+FlavoredHists::FlavoredHists(unsigned flags):
   m_pt_btag(12)
 {
   static_assert(std::numeric_limits<double>::has_infinity, "no infinity");
@@ -193,7 +193,7 @@ void FlavoredHists::writeTo(H5::CommonFG& fg) {
 
 // ====== JetPerfHists (top level) =======
 
-JetPerfHists::JetPerfHists():
+JetPerfHists::JetPerfHists(unsigned flags):
   m_flavors(4)
 {
 }

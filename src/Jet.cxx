@@ -55,7 +55,7 @@ Jet::Jet(const TreeBuffer& buff, int index) :
 
 Jet::Jet(const PetersBuffer& buff, int index) :
   event(buff.entry()),
-  pt(buff.jet_pt[index]),
+  pt(buff.jet_pt[index] * 1e3),
   eta(buff.jet_eta[index]),
   jvf(buff.jvf[index]),
   valid(true),

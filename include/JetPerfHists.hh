@@ -56,7 +56,7 @@ private:
 
 class FlavoredHists {
 public:
-  FlavoredHists();
+  FlavoredHists(unsigned flags = 0);
   void fill(const Jet&, double weight);
   void writeTo(H5::CommonFG&);
 private:
@@ -68,7 +68,7 @@ private:
 
 class JetPerfHists {
 public:
-  JetPerfHists();
+  JetPerfHists(unsigned flags = 0);
   ~JetPerfHists();
   JetPerfHists(JetPerfHists&) = delete;
   JetPerfHists& operator=(JetPerfHists&) = delete;

@@ -9,4 +9,4 @@
 
 # output binaries
 stand-alone
-tag-perf-hists
+tag-perf-*

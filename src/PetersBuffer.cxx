@@ -4,9 +4,9 @@
 #include <fstream> // ofstream
 
 void TagArrays::set(SmartChain* chain, std::string prefix) {
-  chain->SetBranch(prefix + "pu", &pu);
-  chain->SetBranch(prefix + "pc", &pc);
-  chain->SetBranch(prefix + "pb", &pb);
+  chain->SetBranch(prefix + "pu", pu);
+  chain->SetBranch(prefix + "pc", pc);
+  chain->SetBranch(prefix + "pb", pb);
 }
 
 PetersBuffer::PetersBuffer(const std::vector<std::string>& files) :
@@ -21,10 +21,10 @@ PetersBuffer::PetersBuffer(const std::vector<std::string>& files) :
   std::string jc = "jet_";
   std::string fc = "flavor_component_";
   m_chain->SetBranch("nJets",                    &n_jets);
-  m_chain->SetBranch(jc + "pt",                  &jet_pt);
-  m_chain->SetBranch(jc + "eta",                 &jet_eta);
-  m_chain->SetBranch(jc + "JVF",                 &jvf);
-  m_chain->SetBranch(jc + "flavor_truth_label",	 &jet_flavor_truth_label);
+  m_chain->SetBranch(jc + "pt",                  jet_pt);
+  m_chain->SetBranch(jc + "eta",                 jet_eta);
+  m_chain->SetBranch(jc + "JVF",                 jvf);
+  m_chain->SetBranch(jc + "flavor_truth_label",	 jet_flavor_truth_label);
   jfit.set(m_chain, jc + fc + "jfit_");
   jfc.set(m_chain, jc + fc + "jfitc_");
 }
@@ -36,6 +36,11 @@ PetersBuffer::~PetersBuffer() {
 void PetersBuffer::getEntry(int entry) {
   m_entry = entry;
   m_chain->GetEntry(entry);
+  if (n_jets >= MAX_JETS) {
+    auto prob = "found " + std::to_string(n_jets) + " in buffer, max is " +
+      std::to_string(MAX_JETS);
+    throw std::range_error(prob);
+  }
 }
 int PetersBuffer::size() {
   return m_chain->GetEntries();

@@ -60,33 +60,37 @@ LIBS         += $(ROOTLIBS)
 
 # ---- define objects
 GEN_OBJ     := SmartChain.o JetPerfHists.o Jet.o TreeBuffer.o
-GEN_OBJ     += PetersBuffer.o
+GEN_OBJ     += PetersBuffer.o fillPetersHists.o PeterPerfHists.o
 GEN_OBJ     += misc_func.o buildHists.o RunConfig.o
+TOP_OBJ     += tag-perf-d3pd.o tag-perf-peter.o
 
 # stuff used for the c++ executable
-STAND_ALONE_OBJ     := $(GEN_OBJ) stand-alone.o
-STAND_ALONE_NAME  := tag-perf-hists
-STAND_ALONE    := $(OUTPUT)/$(STAND_ALONE_NAME)
+ALL_EXE    := tag-perf-d3pd tag-perf-peter
 
 # phony target used to call ndhist makefile
 NDHIST_DUMMY := buildndhist
-STAND_ALONE_DUMMY := build-stand-alone
+TOP_LEVEL_DUMMY := top-level
+EXE_DUMMY := build-exe
 
 # --- top level command ---
-all: $(STAND_ALONE_DUMMY)
+all: $(TOP_LEVEL_DUMMY)
 	@$(shell ./install/pysetup.py install)
 	@echo "##########################"
 	@echo "#### successful build ####"
 	@echo "##########################"
 
-STAND_ALONE_OBJ_PATHS := $(STAND_ALONE_OBJ:%=$(BIN)/%)
+GEN_OBJ_PATHS := $(GEN_OBJ:%=$(BIN)/%)
+TOP_OBJ_PATHS := $(TOP_OBJ:%=$(BIN)/%)
+ALL_EXE_PATHS := $(ALL_EXE:%=$(OUTPUT)/%)
 
 # we call the dummy first, which builds the dependencies.
 # _after_ these have been built we call the linking rule.
-$(STAND_ALONE_DUMMY): $(NDHIST_DUMMY) $(STAND_ALONE_OBJ_PATHS)
-	@$(MAKE) $(STAND_ALONE) --no-print-directory
+$(TOP_LEVEL_DUMMY): $(NDHIST_DUMMY) $(GEN_OBJ_PATHS) $(TOP_OBJ_PATHS)
+	@$(MAKE) $(EXE_DUMMY) --no-print-directory
 
-$(STAND_ALONE): $(STAND_ALONE_OBJ_PATHS)
+$(EXE_DUMMY): $(ALL_EXE_PATHS)
+
+$(OUTPUT)/tag-perf-%: $(GEN_OBJ_PATHS) $(BIN)/tag-perf-%.o
 	@mkdir -p $(OUTPUT)
 	@echo "linking $^ --> $@"
 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
@@ -119,7 +123,7 @@ $(DEP)/%.d: %.cxx
 	@$(CXX) -MM -MP $(DEPTARGSTR) $(CXXFLAGS) $(PY_FLAGS) $< -o $@
 
 # clean
-.PHONY : clean rmdep $(NDHIST_DUMMY) $(STAND_ALONE_DUMMY)
+.PHONY : clean rmdep $(NDHIST_DUMMY) $(TOP_LEVEL_DUMMY) $(EXE_DUMMY)
 CLEANLIST     = *~ *.o *.o~ *.d core
 clean:
 	rm -fr $(CLEANLIST) $(CLEANLIST:%=$(BIN)/%) $(CLEANLIST:%=$(DEP)/%)
