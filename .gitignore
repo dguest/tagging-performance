@@ -6,7 +6,3 @@
 /bin/
 /dict/
 /plots/
-
-# output binaries
-stand-alone
-tag-perf-*

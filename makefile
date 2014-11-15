@@ -3,11 +3,11 @@
 # created: Thu Dec 19 17:34:32 EST 2013
 
 # --- set dirs
-BIN          := build
+BUILD          := build
 SRC          := src
 INC          := include
 DICT         := dict
-OUTPUT       := scripts
+OUTPUT       := bin
 
 # --- HACKS ----
 CXXFLAG_HACKS := -Wno-literal-suffix #hdf5 header sets this off
@@ -79,8 +79,8 @@ all: $(TOP_LEVEL_DUMMY)
 	@echo "#### successful build ####"
 	@echo "##########################"
 
-GEN_OBJ_PATHS := $(GEN_OBJ:%=$(BIN)/%)
-TOP_OBJ_PATHS := $(TOP_OBJ:%=$(BIN)/%)
+GEN_OBJ_PATHS := $(GEN_OBJ:%=$(BUILD)/%)
+TOP_OBJ_PATHS := $(TOP_OBJ:%=$(BUILD)/%)
 ALL_EXE_PATHS := $(ALL_EXE:%=$(OUTPUT)/%)
 
 # we call the dummy first, which builds the dependencies.
@@ -90,7 +90,7 @@ $(TOP_LEVEL_DUMMY): $(NDHIST_DUMMY) $(GEN_OBJ_PATHS) $(TOP_OBJ_PATHS)
 
 $(EXE_DUMMY): $(ALL_EXE_PATHS)
 
-$(OUTPUT)/tag-perf-%: $(GEN_OBJ_PATHS) $(BIN)/tag-perf-%.o
+$(OUTPUT)/tag-perf-%: $(GEN_OBJ_PATHS) $(BUILD)/tag-perf-%.o
 	@mkdir -p $(OUTPUT)
 	@echo "linking $^ --> $@"
 	@$(CXX) -o $@ $^ $(LIBS) $(LDFLAGS)
@@ -101,14 +101,14 @@ $(NDHIST_DUMMY):
 # --------------------------------------------------
 
 # compile rule
-$(BIN)/%.o: %.cxx
+$(BUILD)/%.o: %.cxx
 	@echo compiling $<
-	@mkdir -p $(BIN)
+	@mkdir -p $(BUILD)
 	@$(CXX) -c $(CXXFLAGS) $< -o $@
 
 # use auto dependency generation
 ALLOBJ       := $(GEN_OBJ)
-DEP = $(BIN)
+DEP = $(BUILD)
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),rmdep)
@@ -116,7 +116,7 @@ include  $(ALLOBJ:%.o=$(DEP)/%.d)
 endif
 endif
 
-DEPTARGSTR = -MT $(BIN)/$*.o -MT $(DEP)/$*.d
+DEPTARGSTR = -MT $(BUILD)/$*.o -MT $(DEP)/$*.d
 $(DEP)/%.d: %.cxx
 	@echo making dependencies for $<
 	@mkdir -p $(DEP)
@@ -126,8 +126,8 @@ $(DEP)/%.d: %.cxx
 .PHONY : clean rmdep $(NDHIST_DUMMY) $(TOP_LEVEL_DUMMY) $(EXE_DUMMY)
 CLEANLIST     = *~ *.o *.o~ *.d core
 clean:
-	rm -fr $(CLEANLIST) $(CLEANLIST:%=$(BIN)/%) $(CLEANLIST:%=$(DEP)/%)
-	rm -fr $(BIN) $(DICT) $(STAND_ALONE)
+	rm -fr $(CLEANLIST) $(CLEANLIST:%=$(BUILD)/%) $(CLEANLIST:%=$(DEP)/%)
+	rm -fr $(BUILD) $(DICT)
 	@$(MAKE) -C $(ND_HIST_DIR) clean
 	@$(shell ./install/pysetup.py remove)
 
