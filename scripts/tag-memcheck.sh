@@ -11,4 +11,4 @@ rm -f $out
 
 supp=--suppressions=${ROOTSYS}/etc/root/valgrind-root.supp
 leakch=--leak-check=full
-valgrind $supp $leakch tag-perf-hists -t $1 -o $out 
+valgrind $supp $leakch tag-perf-d3pd -t $1 -o $out 
