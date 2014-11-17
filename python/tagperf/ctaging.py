@@ -22,6 +22,23 @@ _line_width = 1.8
 # __________________________________________________________________________
 # top level functions
 
+def peters_plots(in_file_name, cache_name, out_dir, ext):
+    """
+    Top level routine to make peters plots
+    """
+    def lookup(flavor, tagger, binning):
+        return '{}/{}'.format(flavor, tagger)
+    with h5py.File(in_file_name, 'r') as in_file:
+        with h5py.File(cache_name, 'a') as out_file:
+            _make_rejrej(in_file, out_file, tagger='jfc', lookup=lookup)
+            _make_rejrej(in_file, out_file, tagger='jfit', lookup=lookup)
+
+    if not isdir(out_dir):
+        os.mkdir(out_dir)
+
+    with h5py.File(cache_name, 'r') as cache:
+        draw_simple_rejrej(cache, out_dir, ext, tagger='jfc')
+
 _mv1uc_name = 'mv'
 _mv1uc_disp = 'MV1 + MV1c'
 def make_plots(in_file_name, cache_name, out_dir, ext):
@@ -159,12 +176,17 @@ def _get_eff_hist(int_counts):
 # __________________________________________________________________________
 # 'plumbing' level routines to calculate the things we'll later plot
 
-def _make_rejrej(in_file, out_file, tagger='gaia', binning='all'):
+def _make_rejrej(in_file, out_file, tagger='gaia', binning='all',
+                 lookup=_get_hist_name):
     """
     Builds 2d efficiency arrays, binned by rejection.
     """
     def make_int_flavor(flavor):
-        ds = in_file[_get_hist_name(flavor, tagger=tagger, binning=binning)]
+        try:
+            lookup_str = lookup(flavor, tagger=tagger, binning=binning)
+            ds = in_file[lookup_str]
+        except KeyError as err:
+            raise KeyError(err.args[0] + ' -- looking for ' + lookup_str)
         return np.array(ds)[::-1,::-1].cumsum(axis=0).cumsum(axis=1)
 
     if not tagger in out_file:
@@ -399,14 +421,14 @@ def draw_contour_rejrej(in_file, out_dir, ext='.pdf'):
     out_name = '{}/rejrej-cont{}'.format(out_dir, ext)
     canvas.print_figure(out_name, bbox_inches='tight')
 
-def draw_simple_rejrej(in_file, out_dir, ext='.pdf'):
+def draw_simple_rejrej(in_file, out_dir, ext='.pdf', tagger='gaia'):
     """
     Draw iso-efficiency contours for one tagger (no colors).
     """
     fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
-    ds = in_file['gaia/all']
+    ds = in_file[tagger + '/all']
 
     _label_axes(ax, ds)
     _add_contour(ax, ds, opts=dict(textsize=10))

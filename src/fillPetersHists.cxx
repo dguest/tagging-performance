@@ -30,7 +30,7 @@ int fillPetersHists(std::vector<std::string> files, std::string out_name,
     total_jets += n_jets;
     for (int jidx = 0; jidx < n_jets; jidx++) {
       Jet jet(buffer, jidx);
-      if (jet.pt < 20e3 || std::abs(jet.eta) > 2.5 || jet.jvf > 0.5) continue;
+      if (jet.pt < 20e3 || std::abs(jet.eta) > 2.5 || jet.jvf < 0.5) continue;
       hists.fill(jet, 1.0);
     }
   }
