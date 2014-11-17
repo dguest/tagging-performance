@@ -23,10 +23,16 @@ def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5):
     ax = fig.add_subplot(1,1,1)
     imextent = list(xlims) + list(ylims)
     ax.imshow(rgb, origin='lower', extent=imextent, aspect='auto')
+    ax.set_xlim(*xlims)
+    ax.set_ylim(*ylims)
     _label_axes(ax)
     _add_legend(ax)
     _add_atlas(ax, 0.02, 0.98)
-    _add_sim_info(ax, 0.02, 0.34, size=12)
+    _add_sim_info(ax, 0.02, 0.38, size=10)
+    xcut, ycut = 0.95, -0.9
+    cutcolor = 'DarkGreen'
+    _add_cut(ax, xcut, ycut, color=cutcolor)
+    _annotate_cut(ax, xy=(3.5, ycut), xyt=(0.95, 0.05), color=cutcolor)
     if not os.path.isdir(out_dir):
         os.mkdir(out_dir)
     canvas.print_figure('{}/2d-cut{}'.format(out_dir, ext),
@@ -41,13 +47,32 @@ def _label_axes(ax, size=14):
 def _add_legend(ax):
     rgb_patch = [Patch(color=x) for x in 'rgb']
     bcl_names = [r'$b$', r'$c$', 'light']
+    title = 'Jet Flavor'
     ax.legend(rgb_patch, bcl_names, loc='lower left', fancybox=True,
-              borderaxespad=0.2)
+              borderaxespad=0.2, title=title,
+              labelspacing=0.2, handlelength=1.0)
 
 def _add_atlas(ax, x, y, size=16):
     props = dict(boxstyle='round', facecolor='w')
     ax.text(x, y, 'ATLAS Internal', weight='bold', style='italic',
             transform=ax.transAxes, bbox=props, va='top', ha='left')
+
+def _add_cut(ax, x, y, color='Purple'):
+    ym = ax.get_ylim()[1]
+    xm = ax.get_xlim()[1]
+    xv = [x, x, xm]
+    yv = [ym, y, y]
+    ax.plot(xv, yv, color=color, lw=3)
+
+def _annotate_cut(ax, xy, xyt, size=12, color='Purple'):
+    text = (
+        'JetFitterCharm\n'
+        "medium tag")
+    bbox_style = dict(boxstyle="round", fc='w', ec=color)
+    arrowprops = dict(arrowstyle='simple', color=color)
+    textprops = dict(ha='right', va='bottom')
+    ax.annotate(text, size=size, xy=xy, xytext=xyt, arrowprops=arrowprops,
+                textcoords=ax.transAxes, bbox=bbox_style, **textprops)
 
 def _add_sim_info(ax, x, y, size=16):
     props = dict(boxstyle='round', facecolor='w')
