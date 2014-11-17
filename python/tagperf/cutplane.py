@@ -46,7 +46,7 @@ def _label_axes(ax, size=14):
 
 def _add_legend(ax):
     rgb_patch = [Patch(color=x) for x in 'rgb']
-    bcl_names = [r'$b$', r'$c$', 'light']
+    bcl_names = [r'$b$', r'$c$', r'$\rm light$']
     title = 'Jet Flavor'
     ax.legend(rgb_patch, bcl_names, loc='lower left', fancybox=True,
               borderaxespad=0.2, title=title,
@@ -78,7 +78,7 @@ def _add_sim_info(ax, x, y, size=16):
     props = dict(boxstyle='round', facecolor='w')
     text = (
         r'$t\bar{t}$ Simulation' + '\n'
-        r'$\sqrt{s}$ = 8 TeV' + '\n'
+        r'$\sqrt{s} =$ 8 TeV' + '\n'
         r'$p_{\rm T}^{\rm jet} > $ 20 GeV' + '\n'
         r'$|\eta| < $ 2.5' + '\n'
         r'JetFitterCharm')
