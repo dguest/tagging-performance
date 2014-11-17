@@ -10,7 +10,7 @@ class PetersEff:
         self.fail_array = np.array(fail_ds)[1:-1]
         xmin, xmax = [pass_ds.attrs[x][0] for x in ['min', 'max']]
         assert pass_ds.attrs['units'] == 'MeV'
-        self.xvalues = np.arange(xmin, xmax, len(self.pass_array) + 1)
+        self.xvalues = np.linspace(xmin, xmax, len(self.pass_array) )
     def get_efficiency(self, bin_vals=_peter_bin_vals):
         """return two tuple"""
         all_jets = self.pass_array + self.fail_array
@@ -30,3 +30,4 @@ class PetersEff:
             x_wd.append((bin - last_bin) / 2)
             last_bin = bin
         return np.array(x_ctrs), np.array(y_ctrs), np.array(x_wd)
+

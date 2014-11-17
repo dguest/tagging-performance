@@ -15,6 +15,7 @@ from matplotlib.lines import Line2D
 from matplotlib.legend import Legend
 
 from tagperf.peters import PetersEff
+from tagperf.tagschema import long_particle_names
 
 _text_size = 12
 _fig_edge = 5.0
@@ -22,9 +23,6 @@ _fig_size = (_fig_edge, _fig_edge * 3/4)
 _square_fig_size = (_fig_edge, _fig_edge)
 _line_width = 1.8
 
-long_particle_names = {
-    'U': r'light', 'T':r'$\tau$', 'B': r'$b$', 'C':r'$c$'
-}
 
 # __________________________________________________________________________
 # top level functions

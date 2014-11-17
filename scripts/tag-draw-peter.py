@@ -14,14 +14,15 @@ def run():
         default='.pdf')
     args = parser.parse_args(sys.argv[1:])
 
-    from tagperf import ctaging
+    from tagperf import ctaging, cutplane
     from tagperf.bullshit import helvetify
     print('making ctag plots')
     helvetify()
     cache = 'REJREJ_CACHE.h5'
-    ctaging.peters_cross_check(args.hdf_file, args.out_dir, args.ext)
-    ctaging.peters_plots(args.hdf_file, cache, args.out_dir, args.ext)
-    ctaging.make_peters_1d(args.hdf_file, args.out_dir, args.ext)
+    # ctaging.peters_cross_check(args.hdf_file, args.out_dir, args.ext)
+    cutplane.draw_cut_plane(args.hdf_file, args.out_dir, args.ext)
+    # ctaging.peters_plots(args.hdf_file, cache, args.out_dir, args.ext)
+    # ctaging.make_peters_1d(args.hdf_file, args.out_dir, args.ext)
 
 if __name__ == '__main__':
     run()
