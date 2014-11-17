@@ -77,7 +77,7 @@ def _annotate_cut(ax, xy, xyt, size=12, color='Purple'):
 def _add_sim_info(ax, x, y, size=16):
     props = dict(boxstyle='round', facecolor='w')
     text = (
-        r'$t\bar{t}$ simulation' + '\n'
+        r'$t\bar{t}$ Simulation' + '\n'
         r'$\sqrt{s}$ = 8 TeV' + '\n'
         r'$p_{\rm T}^{\rm jet} > $ 20 GeV' + '\n'
         r'$|\eta| < $ 2.5' + '\n'

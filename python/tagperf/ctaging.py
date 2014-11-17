@@ -213,8 +213,8 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
 
 def _setup_1d_ctag_legs(ax, textsize, reject='U', official=False):
     ax.set_yscale('log')
-    ax.set_xlabel('$c$ Jet Efficiency', x=0.98, ha='right', size=textsize)
-    ylab = '{rej} Jet Rejection'.format(rej=long_particle_names[reject])
+    ax.set_xlabel('$c$ jet efficiency', x=0.98, ha='right', size=textsize)
+    ylab = '{rej} jet rejection'.format(rej=long_particle_names[reject])
     ax.set_ylabel(ylab, y=0.98, ha='right', size=textsize)
     ax.tick_params(labelsize=textsize)
     ax.grid(which='both', alpha=0.05, ls='-')
