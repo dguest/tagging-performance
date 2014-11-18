@@ -18,7 +18,7 @@ def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5):
     for iii in range(rgb.shape[2]):
         maxval = (rgb[:,:,iii].max() * maxcut)
         rgb[:,:,iii] = np.minimum(rgb[:,:,iii] / maxval, 1.0)
-    fig = Figure(figsize=(5.0,5.0))
+    fig = Figure(figsize=(5.0,5.0*3/4))
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     imextent = list(xlims) + list(ylims)
