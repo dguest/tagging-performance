@@ -19,7 +19,7 @@ def peters_cross_check(in_file_name, out_dir, ext):
         effs = {x:PetersEff(in_file, x) for x in 'CUB'}
     peter_colors = {'B':'r','C':'g','U':'b'}
     for flavor, eff in effs.items():
-        pt, efficiency, pt_wd = eff.get_efficiency()
+        pt, efficiency, pt_wd = eff.get_efficiency(_other_bin_vals)
         pt_gev, wd_gev = [x / 1000 for x in [pt, pt_wd]]
         lab = long_particle_names[flavor]
         ax.errorbar(pt_gev, efficiency, xerr=wd_gev, label=lab,
@@ -27,12 +27,14 @@ def peters_cross_check(in_file_name, out_dir, ext):
     ax.legend(numpoints=1, framealpha=0)
     ax.set_xlabel(r'Jet $p_{\rm T}$', x=0.98, ha='right')
     ax.set_ylabel(r'JetFitterCharm Efficiency', y=0.98, ha='right')
+    ax.set_yscale('log')
     if not os.path.isdir(out_dir):
         os.mkdir(out_dir)
     canvas.print_figure('{}/cross-check{}'.format(out_dir, ext),
                         bbox_inches='tight')
 
 _peter_bin_vals = [20, 25, 30, 50, 80, 120, 160, 200, 300,  400, 750]
+_other_bin_vals = np.hstack([np.arange(20, 150, 2),np.arange(150, 300, 5)])
 class PetersEff:
     """make binned efficinecy as a cross check for peter's plots"""
     def __init__(self, in_file, flavor):
