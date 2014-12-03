@@ -1,6 +1,20 @@
 """
 Functions to add offical ATLAS labels
 """
+import math
+
+def log_formatting(value, pos):
+    roundval = round(value)
+    if roundval == 1:
+        base = 1
+        exp = ''
+    elif roundval == 10:
+        base = 10
+        exp = ''
+    else:
+        base = 10
+        exp = round(math.log(value,10))
+    return r'{}$^{{\mathdefault{{ {} }} }}$'.format(base, exp)
 
 def add_atlas(ax, x, y, size=16, external=False):
     ax.text(x, y, 'ATLAS', weight='bold', style='italic',

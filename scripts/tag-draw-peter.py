@@ -18,10 +18,11 @@ def run():
         '-c', '--cache', help='cache for rejrej plots ' + d, default=cache)
     args = parser.parse_args(sys.argv[1:])
 
-    from tagperf import ctaging, cutplane, peters
+    from tagperf import ctaging, cutplane, peters, cutline
     from tagperf.bullshit import helvetify
     print('making ctag plots')
     helvetify()
+    cutline.draw_cut_lines(args.hdf_file, args.out_dir, args.ext)
     peters.peters_cross_check(args.hdf_file, args.out_dir, args.ext)
     cutplane.draw_cut_plane(args.hdf_file, args.out_dir, args.ext)
     ctaging.peters_plots(args.hdf_file, args.cache, args.out_dir, args.ext)

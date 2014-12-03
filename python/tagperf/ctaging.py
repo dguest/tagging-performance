@@ -16,7 +16,7 @@ from matplotlib.legend import Legend
 
 from tagperf.peters import PetersEff
 from tagperf.tagschema import long_particle_names
-from tagperf.pr import add_atlas, add_official_garbage
+from tagperf.pr import add_atlas, add_official_garbage, log_formatting
 
 _text_size = 12
 _fig_edge = 5.0
@@ -211,22 +211,9 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
 # _________________________________________________________________________
 # common utility functions
 
-def _log_formatting(value, pos):
-    roundval = round(value)
-    if roundval == 1:
-        base = 1
-        exp = ''
-    elif roundval == 10:
-        base = 10
-        exp = ''
-    else:
-        base = 10
-        exp = round(math.log(value,10))
-    return r'{}$^{{\mathdefault{{ {} }} }}$'.format(base, exp)
-
 def _setup_1d_ctag_legs(ax, textsize, reject='U', official=False):
     ax.set_yscale('log')
-    formatter = FuncFormatter(_log_formatting)
+    formatter = FuncFormatter(log_formatting)
     ax.yaxis.set_major_formatter(formatter)
     ax.set_xlabel('$c$ jet efficiency', x=0.98, ha='right', size=textsize)
     ylab = '{rej} jet rejection'.format(rej=long_particle_names[reject])

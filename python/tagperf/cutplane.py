@@ -8,11 +8,14 @@ from matplotlib.patches import Patch
 
 from tagperf.tagschema import long_particle_names
 
+ANTI_LIGHT_RANGE = (-4.5, 5.0)
+ANTI_B_RANGE = (-7.0, 3.5)
+
 def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5):
     with h5py.File(hdf_file) as in_file:
-        planes = {x: CountPlane(in_file[x + '/jfc']) for x in 'BUC'}
-    xlims = (-4.5, 5.0)
-    ylims = (-7, 3.5)
+        planes = {x: CountPlane(in_file[x][tagger]) for x in 'BUC'}
+    xlims = ANTI_LIGHT_RANGE
+    ylims = ANTI_B_RANGE
     rgb = np.dstack([planes[x].subplane(xlims, ylims) for x in 'BCU'])
     rgb = np.log(rgb + 1)
     for iii in range(rgb.shape[2]):
@@ -93,12 +96,22 @@ class CountPlane:
         self.xvalues = np.linspace(*xextent, num=(ar.shape[1] + 1))
         self.yvalues = np.linspace(*yextent, num=(ar.shape[0] + 1))
         self.array = ar.T
-    def subplane(self, xlims=(-5.0,8.0), ylims=(-8.0, 4.0)):
+    def subplane(self, xlims=ANTI_LIGHT_RANGE, ylims=ANTI_B_RANGE):
         xv, yv = self.xvalues, self.yvalues
-        xvalid_idx = np.nonzero((xlims[0] < xv) & (xv < xlims[1]))[0]
+        xvalid_idx = np.nonzero((xlims[0] <= xv) & (xv <= xlims[1]))[0]
         xlow, xhigh = xvalid_idx[0], xvalid_idx[-1]
-        yvalid_idx = np.nonzero((ylims[0] < yv) & (yv < ylims[1]))[0]
+        yvalid_idx = np.nonzero((ylims[0] <= yv) & (yv <= ylims[1]))[0]
         ylow, yhigh = yvalid_idx[0], yvalid_idx[-1]
         subarray = self.array[ylow:yhigh, xlow:xhigh]
         return subarray
-
+    def project(self, axis, lims=(-10,10)):
+        """return x, y plottable values"""
+        assert axis.lower() in 'xy', 'must project along x or y'
+        vals = self.xvalues if axis == 'x' else self.yvalues
+        valid_idx = np.nonzero((lims[0] <= vals) & (vals <= lims[1]))[0]
+        rng = slice(valid_idx[0], valid_idx[-1])
+        if axis == 'x':
+            yvals = self.array[:, rng].sum(0)
+        elif axis == 'y':
+            yvals = self.array[rng, :].sum(1)
+        return vals[rng], yvals
