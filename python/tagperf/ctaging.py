@@ -16,6 +16,7 @@ from matplotlib.legend import Legend
 
 from tagperf.peters import PetersEff
 from tagperf.tagschema import long_particle_names
+from tagperf.pr import add_atlas, add_official_garbage
 
 _text_size = 12
 _fig_edge = 5.0
@@ -236,26 +237,8 @@ def _setup_1d_ctag_legs(ax, textsize, reject='U', official=False):
         x = 0.5
         size = 12
         ysp = 0.1 * size / 16
-        _add_atlas(ax, x + 0.13, 0.9, size=size)
-        _add_official_garbage(ax, x, 0.9 - ysp, size=size, ysp=ysp)
-
-def _add_atlas(ax, x, y, size=16):
-    ax.text(x, y, 'ATLAS', weight='bold', style='italic',
-            horizontalalignment='right',
-            transform=ax.transAxes, size=size)
-    ax.text(x, y, ' Internal',
-            horizontalalignment='left',
-            transform=ax.transAxes, size=size)
-
-def _add_official_garbage(ax, x, y, size=16, ysp=0.1, ha='left'):
-    tricks = dict(
-        ha=ha, transform=ax.transAxes, size=size)
-    first_line = r'$t\bar{t}$ Simulation, $\sqrt{s}$ = 8 TeV'
-    ax.text(x, y, first_line, **tricks)
-    pt = r'$p_{\rm T}^{\rm jet} > $ 20 GeV'
-    eta = r' $|\eta^{\rm jet}| < $ 2.5'
-    ax.text(x, y - 1*ysp, pt + ', ' + eta, **tricks)
-    ax.text(x, y - 2*ysp, 'JetFitterCharm', **tricks)
+        add_atlas(ax, x + 0.13, 0.9, size=size)
+        add_official_garbage(ax, x, 0.9 - ysp, size=size, ysp=ysp)
 
 def _peters_lookup(flavor, tagger, binning):
     return '{}/{}'.format(flavor, tagger)
@@ -542,8 +525,8 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf', tagger='gaia',
     if official:
         size = 10
         ysp = 0.1*size/16
-        _add_official_garbage(ax, 0.97, 0.93, size=size, ysp=ysp, ha='right')
-        _add_atlas(ax, 0.2, 0.92, size=size*1.2)
+        add_official_garbage(ax, 0.97, 0.93, size=size, ysp=ysp, ha='right')
+        add_atlas(ax, 0.2, 0.92, size=size*1.2)
         z = long_particle_names[ds.attrs['xyz'][2]]
         zlab = '{}-jet efficiency'.format(z)
         ax.text(0.97, 0.90 - ysp*4, 'contours give \n ' + zlab,
