@@ -10,6 +10,8 @@ from tagperf.tagschema import long_particle_names
 
 ANTI_LIGHT_RANGE = (-4.5, 5.0)
 ANTI_B_RANGE = (-7.0, 3.5)
+ANTI_B_CUT = -0.9
+ANTI_LIGHT_CUT = 0.95
 
 def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5):
     with h5py.File(hdf_file) as in_file:
@@ -32,7 +34,7 @@ def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5):
     _add_legend(ax)
     _add_atlas(ax, 0.02, 0.98)
     _add_sim_info(ax, 0.02, 0.38, size=10)
-    xcut, ycut = 0.95, -0.9
+    xcut, ycut = ANTI_LIGHT_CUT, ANTI_B_CUT
     cutcolor = 'DarkGreen'
     _add_cut(ax, xcut, ycut, color=cutcolor)
     _annotate_cut(ax, xy=(3.5, ycut), xyt=(0.95, 0.05), color=cutcolor)
