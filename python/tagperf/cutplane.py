@@ -77,7 +77,7 @@ def _annotate_cut(ax, xy, xyt, size=12, color='Purple'):
     arrowprops = dict(arrowstyle='simple', color=color)
     textprops = dict(ha='right', va='bottom')
     ax.annotate(text, size=size, xy=xy, xytext=xyt, arrowprops=arrowprops,
-                textcoords=ax.transAxes, bbox=bbox_style, **textprops)
+                textcoords='axes fraction', bbox=bbox_style, **textprops)
 
 def _add_sim_info(ax, x, y, size=16):
     props = dict(boxstyle='round', facecolor='w')
