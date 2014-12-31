@@ -49,7 +49,7 @@ def peters_cross_check(in_file_name, out_dir, ext):
                         bbox_inches='tight')
 
 # should move this too
-def peters_plots(in_file_name, cache_name, out_dir, ext):
+def peters_plots(in_file_name, cache_name, out_dir, ext, approval='Internal'):
     """
     Top level routine to make peters plots
     """
@@ -63,11 +63,13 @@ def peters_plots(in_file_name, cache_name, out_dir, ext):
         os.mkdir(out_dir)
 
     with h5py.File(cache_name, 'r') as cache:
-        draw_simple_rejrej(cache, out_dir, ext, tagger='jfc', official=True)
+        draw_simple_rejrej(cache, out_dir, ext, tagger='jfc', official=True,
+                           approval=approval)
 
 # should also move this to `peters`
 _peters_rej = [4, 5, 6, 7, 8, 10]
-def make_peters_1d(in_file_name, out_dir, ext, b_rej=_peters_rej):
+def make_peters_1d(in_file_name, out_dir, ext, b_rej=_peters_rej,
+                   approval='Internal'):
     tagger = 'jfc'
     textsize = _text_size
     b_eff_styles = _b_eff_styles
@@ -98,7 +100,7 @@ def make_peters_1d(in_file_name, out_dir, ext, b_rej=_peters_rej):
                     labelspacing=0.1, title='$b$-rejection')
     leg.get_title().set_fontsize(textsize)
 
-    _setup_1d_ctag_legs(ax, textsize, official=True)
+    _setup_1d_ctag_legs(ax, textsize, official=True, approval=approval)
     ax.set_xlim(0.10, 0.5)
     ax.set_ylim(1, 1e3)
 
@@ -211,7 +213,8 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
 # _________________________________________________________________________
 # common utility functions
 
-def _setup_1d_ctag_legs(ax, textsize, reject='U', official=False):
+def _setup_1d_ctag_legs(ax, textsize, reject='U', official=False,
+                        approval='Internal'):
     ax.set_yscale('log')
     formatter = FuncFormatter(log_formatting)
     ax.yaxis.set_major_formatter(formatter)
@@ -224,7 +227,7 @@ def _setup_1d_ctag_legs(ax, textsize, reject='U', official=False):
         x = 0.5
         size = 12
         ysp = 0.1 * size / 16
-        add_atlas(ax, x + 0.13, 0.9, size=size)
+        add_atlas(ax, x + 0.13, 0.9, size=size, approval=approval)
         add_official_garbage(ax, x, 0.9 - ysp, size=size, ysp=ysp)
 
 def _peters_lookup(flavor, tagger, binning):
@@ -497,7 +500,7 @@ def draw_contour_rejrej(in_file, out_dir, ext='.pdf'):
     canvas.print_figure(out_name, bbox_inches='tight')
 
 def draw_simple_rejrej(in_file, out_dir, ext='.pdf', tagger='gaia',
-                       official=False):
+                       official=False, approval='Internal'):
     """
     Draw iso-efficiency contours for one tagger (no colors).
     """
@@ -513,7 +516,7 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf', tagger='gaia',
         size = 10
         ysp = 0.1*size/16
         add_official_garbage(ax, 0.97, 0.93, size=size, ysp=ysp, ha='right')
-        add_atlas(ax, 0.2, 0.92, size=size*1.2)
+        add_atlas(ax, 0.2, 0.92, size=size*1.2, approval=approval)
         z = long_particle_names[ds.attrs['xyz'][2]]
         zlab = '{}-jet efficiency'.format(z)
         ax.text(0.97, 0.90 - ysp*4, 'contours give \n ' + zlab,

@@ -16,17 +16,22 @@ def run():
         default='.pdf')
     parser.add_argument(
         '-c', '--cache', help='cache for rejrej plots ' + d, default=cache)
+    parser.add_argument('-a', '--approved', action='store_true')
     args = parser.parse_args(sys.argv[1:])
 
     from tagperf import ctaging, cutplane, peters, cutline
     from tagperf.bullshit import helvetify
     print('making ctag plots')
     helvetify()
-    cutline.draw_cut_lines(args.hdf_file, args.out_dir, args.ext)
+
+    kwd = dict(approval=('' if args.approved else 'Internal'))
+
+    cutline.draw_cut_lines(args.hdf_file, args.out_dir, args.ext, **kwd)
     peters.peters_cross_check(args.hdf_file, args.out_dir, args.ext)
-    cutplane.draw_cut_plane(args.hdf_file, args.out_dir, args.ext)
-    ctaging.peters_plots(args.hdf_file, args.cache, args.out_dir, args.ext)
-    ctaging.make_peters_1d(args.hdf_file, args.out_dir, args.ext)
+    cutplane.draw_cut_plane(args.hdf_file, args.out_dir, args.ext, **kwd)
+    ctaging.peters_plots(args.hdf_file, args.cache, args.out_dir, args.ext,
+                         **kwd)
+    ctaging.make_peters_1d(args.hdf_file, args.out_dir, args.ext, **kwd)
 
 if __name__ == '__main__':
     run()

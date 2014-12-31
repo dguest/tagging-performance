@@ -16,12 +16,12 @@ def log_formatting(value, pos):
         exp = round(math.log(value,10))
     return r'{}$^{{\mathdefault{{ {} }} }}$'.format(base, exp)
 
-def add_atlas(ax, x, y, size=16, external=False):
+def add_atlas(ax, x, y, size=16, approval='Internal'):
     ax.text(x, y, 'ATLAS', weight='bold', style='italic',
             horizontalalignment='right',
             transform=ax.transAxes, size=size)
-    if not external:
-        ax.text(x, y, ' Internal',
+    if approval:
+        ax.text(x, y, ' ' + approval,
                 horizontalalignment='left',
                 transform=ax.transAxes, size=size)
 

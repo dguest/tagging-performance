@@ -12,11 +12,11 @@ from tagperf.cutplane import CountPlane
 from tagperf.cutplane import ANTI_LIGHT_RANGE, ANTI_B_RANGE
 from tagperf.cutplane import ANTI_LIGHT_CUT, ANTI_B_CUT
 
-def draw_cut_lines(hdf_file, out_dir, ext, tagger='jfc'):
+def draw_cut_lines(hdf_file, out_dir, ext, tagger='jfc', approval='Internal'):
     with h5py.File(hdf_file) as in_file:
         planes = {x: CountPlane(in_file[x][tagger]) for x in 'BUC'}
     for ax, disc in [('x', 'light'), ('y', 'bottom')]:
-        canvas = _get_line_canvas(planes, ax)
+        canvas = _get_line_canvas(planes, ax, approval=approval)
         if not os.path.isdir(out_dir):
             os.mkdir(out_dir)
         canvas.print_figure('{}/anti-{}-discriminant{}'.format(
@@ -28,7 +28,7 @@ _cut_vs_ax = {'x': ANTI_LIGHT_CUT, 'y': ANTI_B_CUT}
 _peter_colors = {'B':'r','C':'g','U':'b'}
 _legpos_vs_ax = {'x':'upper left', 'y':'upper right'}
 _text_size = 12
-def _get_line_canvas(planes, axis, axsize=14, rebin=5):
+def _get_line_canvas(planes, axis, axsize=14, rebin=5, approval=''):
     """return the canvas with everything drawn on it"""
     fig = Figure(figsize=(5.0, 5.0*3/4))
     canvas = FigureCanvas(fig)
@@ -58,7 +58,7 @@ def _get_line_canvas(planes, axis, axsize=14, rebin=5):
     off_x = 0.05 if 'right' in legloc else 0.5
     off_y = 0.93
     ysp = 0.07
-    add_atlas(ax, off_x + 0.13, off_y, size=_text_size)
+    add_atlas(ax, off_x + 0.13, off_y, size=_text_size, approval=approval)
     add_official_garbage(ax, off_x, off_y - ysp, size=_text_size, ysp=0.07)
     fig.tight_layout(pad=0, h_pad=0, w_pad=0)
     return canvas

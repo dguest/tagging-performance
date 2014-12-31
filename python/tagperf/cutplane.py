@@ -13,7 +13,8 @@ ANTI_B_RANGE = (-7.0, 3.5)
 ANTI_B_CUT = -0.9
 ANTI_LIGHT_CUT = 0.95
 
-def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5):
+def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5,
+                   approval='Internal'):
     with h5py.File(hdf_file) as in_file:
         planes = {x: CountPlane(in_file[x][tagger]) for x in 'BUC'}
     xlims = ANTI_LIGHT_RANGE
@@ -32,7 +33,7 @@ def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5):
     ax.set_ylim(*ylims)
     _label_axes(ax)
     _add_legend(ax)
-    _add_atlas(ax, 0.02, 0.98)
+    _add_atlas(ax, 0.02, 0.98, approval=approval)
     _add_sim_info(ax, 0.02, 0.38, size=10)
     xcut, ycut = ANTI_LIGHT_CUT, ANTI_B_CUT
     cutcolor = 'DarkGreen'
@@ -57,9 +58,10 @@ def _add_legend(ax):
               borderaxespad=0.2, title=title,
               labelspacing=0.2, handlelength=1.0)
 
-def _add_atlas(ax, x, y, size=16):
+def _add_atlas(ax, x, y, size=16, approval='Internal'):
     props = dict(boxstyle='round', facecolor='w')
-    ax.text(x, y, 'ATLAS Internal', weight='bold', style='italic',
+    lbl = 'ATLAS ' + approval
+    ax.text(x, y, lbl, weight='bold', style='italic',
             transform=ax.transAxes, bbox=props, va='top', ha='left')
 
 def _add_cut(ax, x, y, color='Purple'):
