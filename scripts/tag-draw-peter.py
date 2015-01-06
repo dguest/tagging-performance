@@ -24,7 +24,7 @@ def run():
     print('making ctag plots')
     helvetify()
 
-    kwd = dict(approval=('' if args.approved else 'Internal'))
+    kwd = dict(approval=('Preliminary' if args.approved else 'Internal'))
 
     cutline.draw_cut_lines(args.hdf_file, args.out_dir, args.ext, **kwd)
     peters.peters_cross_check(args.hdf_file, args.out_dir, args.ext)
