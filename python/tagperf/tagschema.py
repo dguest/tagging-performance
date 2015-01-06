@@ -76,5 +76,5 @@ def get_pt_bins(group):
 # internal things
 
 long_particle_names = {
-    'U': r'light', 'T':r'$\tau$', 'B': r'$b$', 'C':r'$c$'
+    'U': r'Light', 'T':r'$\tau$', 'B': r'$b$', 'C':r'$c$'
 }

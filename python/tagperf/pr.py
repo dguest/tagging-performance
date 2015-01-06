@@ -28,7 +28,7 @@ def add_atlas(ax, x, y, size=16, approval='Internal'):
 def add_official_garbage(ax, x, y, size=16, ysp=0.1, ha='left'):
     tricks = dict(
         ha=ha, transform=ax.transAxes, size=size)
-    first_line = r'$t\bar{t}$ Simulation, $\sqrt{s}$ = 8 TeV'
+    first_line = r'$t\bar{t}$ simulation, $\sqrt{s}$ = 8 TeV'
     ax.text(x, y, first_line, **tricks)
     pt = r'$p_{\rm T}^{\rm jet} > $ 20 GeV'
     eta = r' $|\eta^{\rm jet}| < $ 2.5'

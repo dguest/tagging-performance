@@ -6,8 +6,6 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.patches import Patch
 
-from tagperf.tagschema import long_particle_names
-
 ANTI_LIGHT_RANGE = (-4.5, 5.0)
 ANTI_B_RANGE = (-7.0, 3.5)
 ANTI_B_CUT = -0.9
@@ -84,7 +82,7 @@ def _annotate_cut(ax, xy, xyt, size=12, color='Purple'):
 def _add_sim_info(ax, x, y, size=16):
     props = dict(boxstyle='round', facecolor='w')
     text = (
-        r'$t\bar{t}$ Simulation' + '\n'
+        r'$t\bar{t}$ simulation' + '\n'
         r'$\sqrt{s} =$ 8 TeV' + '\n'
         r'$p_{\rm T}^{\rm jet} > $ 20 GeV' + '\n'
         r'$|\eta| < $ 2.5' + '\n'
