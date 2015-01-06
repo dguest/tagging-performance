@@ -218,7 +218,7 @@ def _setup_1d_ctag_legs(ax, textsize, reject='U', official=False,
     ax.set_yscale('log')
     formatter = FuncFormatter(log_formatting)
     ax.yaxis.set_major_formatter(formatter)
-    ax.set_xlabel('$c$ jet efficiency', x=0.98, ha='right', size=textsize)
+    ax.set_xlabel('$c$-jet efficiency', x=0.98, ha='right', size=textsize)
     ylab = '{rej}-jet rejection'.format(rej=long_particle_names[reject])
     ax.set_ylabel(ylab, y=0.98, ha='right', size=textsize)
     ax.tick_params(labelsize=textsize)
