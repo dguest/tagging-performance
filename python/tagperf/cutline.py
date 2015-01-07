@@ -46,7 +46,7 @@ def _get_line_canvas(planes, axis, axsize=14, rebin=5, approval=''):
     ax.set_xlabel(xname, x=0.98, ha='right', size=axsize)
     ax.set_xlim(_range_vs_ax[axis])
     ax.set_yscale('log')
-    ax.set_ylabel('Fraction of Jets',
+    ax.set_ylabel('Fraction of jets',
                   y=0.98, ha='right', size=axsize)
     ax.plot([_cut_vs_ax[axis]]*2, [1e-4, 0.05],'-', color='orange', lw=2)
     ax.set_ylim(1e-4, 1.5)

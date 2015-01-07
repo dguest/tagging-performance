@@ -519,7 +519,7 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf', tagger='gaia',
         add_atlas(ax, 0.2, 0.92, size=size*1.2, approval=approval)
         z = long_particle_names[ds.attrs['xyz'][2]]
         zlab = '{}-jet efficiency'.format(z)
-        ax.text(0.97, 0.90 - ysp*4, 'contours give \n ' + zlab,
+        ax.text(0.97, 0.90 - ysp*4, 'Contours give \n ' + zlab,
                 transform=ax.transAxes, size=size, ha='right')
 
     out_name = '{}/rejrej-simple{}'.format(out_dir, ext)
