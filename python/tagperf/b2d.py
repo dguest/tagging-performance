@@ -18,6 +18,11 @@ def make_b2d(in_file_name, cache_name, out_dir, ext):
     with h5py.File(cache_name, 'r') as cache:
         _draw_btag_rejrej(cache, out_dir, ext)
 
+
+def _get_hist_name_btag(flavor, tagger, binning):
+    return '{}/btag/{}/{}'.format(flavor, binning, tagger)
+
+
 def _draw_btag_rejrej(in_file, out_dir, ext='.pdf', tagger='gaia',
                       official=False, approval='Internal'):
     """

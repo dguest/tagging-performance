@@ -144,9 +144,6 @@ def setup_1d_ctag_legs(ax, textsize, reject='U', official=False,
 def _get_hist_name(flavor, tagger, binning):
     return '{}/ctag/{}/{}'.format(flavor, binning, tagger)
 
-def _get_hist_name_btag(flavor, tagger, binning):
-    return '{}/btag/{}/{}'.format(flavor, binning, tagger)
-
 def _get_rej_hist(int_counts):
     """
     Convert integrated counts (from tagger output distributions) to
@@ -170,13 +167,12 @@ def make_rejrej(in_file, out_file, tagger='gaia', binning='all',
     """
     Builds 2d efficiency arrays, binned by rejection.
     """
-    def make_int_flavor(flavor):
+    def get_flavor(flavor):
         try:
             lookup_str = lookup(flavor, tagger=tagger, binning=binning)
-            ds = in_file[lookup_str]
+            return in_file[lookup_str]
         except KeyError as err:
             raise KeyError(err.args[0] + ' -- looking for ' + lookup_str)
-        return np.array(ds)[::-1,::-1].cumsum(axis=0).cumsum(axis=1)
 
     if not tagger in out_file:
         out_file.create_group(tagger)
@@ -184,59 +180,9 @@ def make_rejrej(in_file, out_file, tagger='gaia', binning='all',
         print('using cached tagger {}, binning {}'.format(tagger, binning))
         return
 
-    int_flavor_arrays = {
-        flav: make_int_flavor(flav) for flav in 'BCU'}
-
-    rej_builder = RejRejComp()
-    rej_builder.x_max = 50.0
-    rej_builder.y_max = 400.0
-    rej_array = rej_builder.get_rej_array(
-        eff=_get_eff_hist(int_flavor_arrays['C']),
-        xrej=_get_rej_hist(int_flavor_arrays['B']),
-        yrej=_get_rej_hist(int_flavor_arrays['U']))
-
-    saved_ds = out_file[tagger].create_dataset(binning, data=rej_array)
-    _save_rej_attrs(saved_ds, rej_builder, 'BUC')
-
-def make_rejrej_btag(in_file, out_file, tagger='gaia', binning='all',
-                      lookup=_get_hist_name_btag):
-    """
-    Builds 2d efficiency arrays, binned by rejection.
-    """
-    def make_int_flavor(flavor):
-        try:
-            lookup_str = lookup(flavor, tagger=tagger, binning=binning)
-            ds = in_file[lookup_str]
-        except KeyError as err:
-            raise KeyError(err.args[0] + ' -- looking for ' + lookup_str)
-        return np.array(ds)[::-1,::-1].cumsum(axis=0).cumsum(axis=1)
-
-    if not tagger in out_file:
-        out_file.create_group(tagger)
-    if binning in out_file[tagger]:
-        print('using cached tagger {}, binning {}'.format(tagger, binning))
-        return
-
-    int_flavor_arrays = {
-        flav: make_int_flavor(flav) for flav in 'BCU'}
-
-    rej_builder = RejRejComp()
-    rej_builder.x_max = 50.0
-    rej_builder.y_max = 400.0
-    rej_array = rej_builder.get_rej_array(
-        eff=_get_eff_hist(int_flavor_arrays['B']),
-        xrej=_get_rej_hist(int_flavor_arrays['C']),
-        yrej=_get_rej_hist(int_flavor_arrays['U']))
-
-    saved_ds = out_file[tagger].create_dataset(binning, data=rej_array)
-    _save_rej_attrs(saved_ds, rej_builder, 'CUB')
-
-def _save_rej_attrs(saved_ds, rej_builder, xyz):
-    saved_ds.attrs['x_max'] = rej_builder.x_max
-    saved_ds.attrs['y_max'] = rej_builder.y_max
-    saved_ds.attrs['x_min'] = rej_builder.x_min
-    saved_ds.attrs['y_min'] = rej_builder.y_min
-    saved_ds.attrs['xyz'] = xyz
+    rej_builder = RejRejComp('BUC', 50.0, 400.0)
+    rej_builder.calculate(get_flavor)
+    rej_builder.save(out_file, tagger, binning)
 
 class ProgBar(object):
     """
@@ -264,12 +210,42 @@ class RejRejComp(object):
     Class to convert three arrays (one efficiency and two rejection) into
     a 2D efficiency array binned by rejection.
     """
-    def __init__(self):
+    def __init__(self, xyz='BUC', xmax=50.0, ymax=400.0):
         self.n_bins = 100
         self.x_min = 1.0
         self.y_min = 1.0
-        self.x_max = 200.0
-        self.y_max = 1000.0
+        self.x_max = xmax
+        self.y_max = ymax
+        self.xyz = xyz
+        self.rej_array = None
+
+    def calculate(self, get_flavor):
+        """get_flavor is a function that returns array given a flavor"""
+        int_arr = {}
+        for flavor in self.xyz:
+            arr = np.asarray(get_flavor(flavor))
+            int_arr[flavor] = arr[::-1,::-1].cumsum(axis=0).cumsum(axis=1)
+
+        x, y, z = self.xyz
+        get_eff, get_rej = _get_eff_hist, _get_rej_hist
+        self.rej_array = self.get_rej_array(
+            eff=get_eff(int_arr[z]),
+            xrej=get_rej(int_arr[x]),
+            yrej=get_rej(int_arr[y]))
+
+    def save(self, out_file, tagger, binning):
+        assert self.rej_array is not None, 'need to load an array first'
+
+        if not tagger in out_file:
+            out_file.create_group(tagger)
+        saved_ds = out_file[tagger].create_dataset(
+            binning, data=self.rej_array)
+
+        saved_ds.attrs['x_max'] = self.x_max
+        saved_ds.attrs['y_max'] = self.y_max
+        saved_ds.attrs['x_min'] = self.x_min
+        saved_ds.attrs['y_min'] = self.y_min
+        saved_ds.attrs['xyz'] = self.xyz
 
     def _logspace(self, low, high):
         return np.logspace(math.log10(low), math.log10(high), self.n_bins)
