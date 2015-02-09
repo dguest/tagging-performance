@@ -13,7 +13,7 @@ def run():
         '-e', '--ext', help='plot extension (default %(default)s)',
         default='.pdf')
 
-    fdict = {f.name: f for f in [ctag, roc, pt, c1d]}
+    fdict = {f.name: f for f in [ctag, roc, pt, c1d, btag2d]}
     parser.add_argument(
         '-p', '--plots', help='plots to make (default %(default)s)',
         choices=fdict.keys(), default='all')
@@ -34,6 +34,11 @@ def name(name):
         function.name = name
         return function
     return named
+
+@name('btag2d')
+def btag2d(args):
+    from tagperf import b2d
+    b2d.make_b2d(args.hdf_file, 'BTAG_CACHE.h5', args.out_dir, args.ext)
 
 @name('ctag')
 def ctag(args):

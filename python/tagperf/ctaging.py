@@ -358,14 +358,14 @@ def draw_ctag_rejrej(in_file, out_dir, ext='.pdf'):
     ds = in_file['gaia/all']
 
     eff_array, extent = _get_arr_extent(ds)
-    _label_axes(ax, ds)
+    label_rejrej_axes(ax, ds)
     im = ax.imshow(eff_array.T, extent=extent,
                    origin='lower', aspect='auto')
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.grid(which='both')
 
-    # _add_contour(ax,ds)
+    # add_contour(ax,ds)
 
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -417,9 +417,9 @@ def draw_ctag_ratio(in_file, out_dir, ext='.pdf', **opts):
             options['tagger_disp']), size=textsize)
     cb.ax.tick_params(labelsize=textsize, which='both')
 
-    _label_axes(ax, ds, textsize=textsize)
+    label_rejrej_axes(ax, ds, textsize=textsize)
     _add_eq_contour(ax, ds, ds_denom, colorbar=cb)
-    _add_contour(ax,ds, opts=dict(textsize=textsize))
+    add_contour(ax,ds, opts=dict(textsize=textsize))
 
     out_name = '{}/ctag-2d-{}-vs-{}{}'.format(
         out_dir, options['num_tagger'], options['tagger'], ext)
@@ -439,9 +439,9 @@ def draw_contour_rejrej(in_file, out_dir, ext='.pdf'):
     ds = in_file['gaia/all']
     ds_denom = in_file['jfc/all']
 
-    _label_axes(ax, ds)
+    label_rejrej_axes(ax, ds)
     _add_eq_contour(ax, ds, ds_denom, levels=[1.05, 1.10, 1.15], smooth=1.0)
-    _add_contour(ax, ds)
+    add_contour(ax, ds)
 
     out_name = '{}/rejrej-cont{}'.format(out_dir, ext)
     canvas.print_figure(out_name, bbox_inches='tight')
@@ -456,9 +456,9 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf', tagger='gaia',
     ax = fig.add_subplot(1,1,1)
     ds = in_file[tagger + '/all']
 
-    _label_axes(ax, ds)
+    label_rejrej_axes(ax, ds)
     levels = np.linspace(0.2, 0.5, 7)
-    _add_contour(ax, ds, opts=dict(levels=levels, textsize=10))
+    add_contour(ax, ds, opts=dict(levels=levels, textsize=10))
     if official:
         size = 10
         ysp = 0.1*size/16
@@ -484,8 +484,8 @@ def draw_xkcd_rejrej(in_file, out_dir, ext='.pdf'):
         ds = in_file['gaia/all']
         ds_denom = in_file['jfc/all']
 
-        _label_axes(ax, ds)
-        _add_contour(ax, ds, opts=dict(levels=np.arange(0.1, 0.8, 0.05)))
+        label_rejrej_axes(ax, ds)
+        add_contour(ax, ds, opts=dict(levels=np.arange(0.1, 0.8, 0.05)))
 
         out_name = '{}/rejrej-xkcd{}'.format(out_dir, ext)
         canvas.print_figure(out_name, bbox_inches='tight')
@@ -503,8 +503,8 @@ def draw_cprob_rejrej(in_file, in_file_up, out_dir, ext='.pdf'):
     ds_denom = in_file['jfc/all']
 
     levels = np.arange(0.1, 0.8, 0.1)
-    _label_axes(ax, ds)
-    _add_contour(ax, ds, opts=dict(levels=levels))
+    label_rejrej_axes(ax, ds)
+    add_contour(ax, ds, opts=dict(levels=levels))
     _add_cprob_curve(ax, in_file_up, levels=levels)
 
     out_name = '{}/rejrej-cprob{}'.format(out_dir, ext)
@@ -548,7 +548,7 @@ def _add_cprob_curve(ax, in_file, levels):
     labels.append('gaia 2D, iso-eff')
     ax.legend(reversed(handles), reversed(labels), numpoints=1)
 
-def _add_contour(ax, ds, opts={}):
+def add_contour(ax, ds, opts={}):
     """
     routine to add the iso-efficiency contours to a plot.
     """
@@ -624,7 +624,7 @@ def _tick_format(x, pos):
     else:
         return '{:.0f}'.format(x)
 
-def _label_axes(ax, ds, textsize=_text_size):
+def label_rejrej_axes(ax, ds, textsize=_text_size):
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.grid(which='both', alpha=0.05, ls='-')
