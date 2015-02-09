@@ -507,7 +507,7 @@ def _add_cprob_curve(ax, in_file, levels):
     b_rej = b_int.max() / b_int[useful_eff]
     u_rej = u_int.max() / u_int[useful_eff]
     ax.plot(b_rej, u_rej, '--r', linewidth=_line_width,
-            label='gaia 1D $p_{c}$')
+            label='gaia 1D $P_{c}$')
     b_rej_pts = []
     u_rej_pts = []
     for eff in levels:
@@ -517,7 +517,7 @@ def _add_cprob_curve(ax, in_file, levels):
         b_rej_pts.append(b_pt)
         u_pt = u_rej[first_above]
         u_rej_pts.append(u_pt)
-        ax.text(b_pt, u_pt, str(eff), color='r', ha='left', va='bottom')
+        # ax.text(b_pt, u_pt, str(eff), color='r', ha='left', va='bottom')
     ax.plot(b_rej_pts, u_rej_pts, 'or')
     handles, labels = ax.get_legend_handles_labels()
     handles.append(Line2D([0,1],[0,0], linewidth=_line_width, color='k'))
