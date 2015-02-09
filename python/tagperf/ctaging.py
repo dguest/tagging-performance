@@ -214,8 +214,8 @@ class RejRejComp(object):
         self.n_bins = 100
         self.x_min = 1.0
         self.y_min = 1.0
-        self.x_max = xmax
-        self.y_max = ymax
+        self.x_max = float(xmax)
+        self.y_max = float(ymax)
         self.xyz = xyz
         self.rej_array = None
 
