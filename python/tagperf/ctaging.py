@@ -28,26 +28,6 @@ _line_width = 1.8
 # __________________________________________________________________________
 # top level functions
 
-# should move this to `peters`
-def peters_cross_check(in_file_name, out_dir, ext):
-    fig = Figure(figsize=_fig_size)
-    canvas = FigureCanvas(fig)
-    ax = fig.add_subplot(1,1,1)
-    with h5py.File(in_file_name, 'r') as in_file:
-        effs = {x:PetersEff(in_file, x) for x in 'CUB'}
-    peter_colors = {'B':'r','C':'g','U':'b'}
-    for flavor, eff in effs.items():
-        pt, efficiency, pt_wd = eff.get_efficiency()
-        pt_gev, wd_gev = [x / 1000 for x in [pt, pt_wd]]
-        lab = long_particle_names[flavor]
-        ax.errorbar(pt_gev, efficiency, xerr=wd_gev, label=lab,
-                    linestyle='none', marker='.', color=peter_colors[flavor])
-    ax.legend(numpoints=1, framealpha=0)
-    if not isdir(out_dir):
-        os.mkdir(out_dir)
-    canvas.print_figure('{}/cross-check{}'.format(out_dir, ext),
-                        bbox_inches='tight')
-
 # should move this too
 def peters_plots(in_file_name, cache_name, out_dir, ext, approval='Internal'):
     """
@@ -236,6 +216,9 @@ def _peters_lookup(flavor, tagger, binning):
 def _get_hist_name(flavor, tagger, binning):
     return '{}/ctag/{}/{}'.format(flavor, binning, tagger)
 
+def _get_hist_name_btag(flavor, tagger, binning):
+    return '{}/btag/{}/{}'.format(flavor, binning, tagger)
+
 def _get_rej_hist(int_counts):
     """
     Convert integrated counts (from tagger output distributions) to
@@ -285,11 +268,47 @@ def _make_rejrej(in_file, out_file, tagger='gaia', binning='all',
         yrej=_get_rej_hist(int_flavor_arrays['U']))
 
     saved_ds = out_file[tagger].create_dataset(binning, data=rej_array)
+    _save_rej_attrs(saved_ds, rej_builder, 'BUC')
+
+def _make_rejrej_btag(in_file, out_file, tagger='gaia', binning='all',
+                      lookup=_get_hist_name_btag):
+    """
+    Builds 2d efficiency arrays, binned by rejection.
+    """
+    def make_int_flavor(flavor):
+        try:
+            lookup_str = lookup(flavor, tagger=tagger, binning=binning)
+            ds = in_file[lookup_str]
+        except KeyError as err:
+            raise KeyError(err.args[0] + ' -- looking for ' + lookup_str)
+        return np.array(ds)[::-1,::-1].cumsum(axis=0).cumsum(axis=1)
+
+    if not tagger in out_file:
+        out_file.create_group(tagger)
+    if binning in out_file[tagger]:
+        print('using cached tagger {}, binning {}'.format(tagger, binning))
+        return
+
+    int_flavor_arrays = {
+        flav: make_int_flavor(flav) for flav in 'BCU'}
+
+    rej_builder = RejRejComp()
+    rej_builder.x_max = 50.0
+    rej_builder.y_max = 400.0
+    rej_array = rej_builder.get_rej_array(
+        eff=_get_eff_hist(int_flavor_arrays['B']),
+        xrej=_get_rej_hist(int_flavor_arrays['C']),
+        yrej=_get_rej_hist(int_flavor_arrays['U']))
+
+    saved_ds = out_file[tagger].create_dataset(binning, data=rej_array)
+    _save_rej_attrs(saved_ds, rej_builder, 'CUB')
+
+def _save_rej_attrs(saved_ds, rej_builder, xyz):
     saved_ds.attrs['x_max'] = rej_builder.x_max
     saved_ds.attrs['y_max'] = rej_builder.y_max
     saved_ds.attrs['x_min'] = rej_builder.x_min
     saved_ds.attrs['y_min'] = rej_builder.y_min
-    saved_ds.attrs['xyz'] = 'BUC'
+    saved_ds.attrs['xyz'] = xyz
 
 class ProgBar(object):
     """
