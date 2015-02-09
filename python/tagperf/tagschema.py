@@ -75,6 +75,15 @@ def get_pt_bins(group):
 #________________________________________________________________________
 # internal things
 
+mv1uc_name = 'mv'
+mv1uc_disp = 'MV1 + MV1c'
+
 long_particle_names = {
     'U': r'Light', 'T':r'$\tau$', 'B': r'$b$', 'C':r'$c$'
+}
+
+leg_labels_colors = {
+    'gaia':('GAIA','red'), mv1uc_name:(mv1uc_disp,'blue'),
+    'jfc':('JetFitterCharm','darkgreen'),
+    'jfit':('JetFitterCOMBNN','orange'),
 }

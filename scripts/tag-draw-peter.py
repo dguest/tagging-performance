@@ -29,9 +29,9 @@ def run():
     cutline.draw_cut_lines(args.hdf_file, args.out_dir, args.ext, **kwd)
     peters.peters_cross_check(args.hdf_file, args.out_dir, args.ext)
     cutplane.draw_cut_plane(args.hdf_file, args.out_dir, args.ext, **kwd)
-    ctaging.peters_plots(args.hdf_file, args.cache, args.out_dir, args.ext,
+    peters.peters_plots(args.hdf_file, args.cache, args.out_dir, args.ext,
                          **kwd)
-    ctaging.make_peters_1d(args.hdf_file, args.out_dir, args.ext, **kwd)
+    peters.make_peters_1d(args.hdf_file, args.out_dir, args.ext, **kwd)
 
 if __name__ == '__main__':
     run()

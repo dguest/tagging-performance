@@ -4,7 +4,6 @@ import h5py
 import math
 import warnings
 import os, sys
-import itertools
 
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -14,8 +13,8 @@ from matplotlib.ticker import FuncFormatter
 from matplotlib.lines import Line2D
 from matplotlib.legend import Legend
 
-from tagperf.peters import PetersEff
 from tagperf.tagschema import long_particle_names
+from tagperf.tagschema import leg_labels_colors, mv1uc_name, mv1uc_disp
 from tagperf.pr import add_atlas, add_official_garbage, log_formatting
 
 _text_size = 12
@@ -28,80 +27,16 @@ _line_width = 1.8
 # __________________________________________________________________________
 # top level functions
 
-# should move this too
-def peters_plots(in_file_name, cache_name, out_dir, ext, approval='Internal'):
-    """
-    Top level routine to make peters plots
-    """
-    lookup = _peters_lookup
-    with h5py.File(in_file_name, 'r') as in_file:
-        with h5py.File(cache_name, 'a') as out_file:
-            _make_rejrej(in_file, out_file, tagger='jfc', lookup=lookup)
-            # _make_rejrej(in_file, out_file, tagger='jfit', lookup=lookup)
-
-    if not isdir(out_dir):
-        os.mkdir(out_dir)
-
-    with h5py.File(cache_name, 'r') as cache:
-        draw_simple_rejrej(cache, out_dir, ext, tagger='jfc', official=True,
-                           approval=approval)
-
-# should also move this to `peters`
-_peters_rej = [4, 5, 6, 7, 8, 10]
-def make_peters_1d(in_file_name, out_dir, ext, b_rej=_peters_rej,
-                   approval='Internal'):
-    tagger = 'jfc'
-    textsize = _text_size
-    b_eff_styles = _b_eff_styles
-
-    b_effs = [1 / r for r in b_rej]
-
-    rej_curves = {}
-    with h5py.File(in_file_name, 'r') as in_file:
-        for eff in b_effs:
-            rej_curves[eff] = _get_c_vs_u_eff_const_beff(
-                in_file, tagger, b_eff=eff, lookup=_peters_lookup)
-
-    lines = ['-','--',':','-.', '_']
-    colors = 'rgbkcm'
-    style_iter = itertools.product(lines, colors)
-    fig = Figure(figsize=_fig_size)
-    canvas = FigureCanvas(fig)
-    ax = fig.add_subplot(1,1,1)
-    for b_eff, (linestyle, color) in zip(b_effs, style_iter):
-        label, _ = _leg_labels_colors.get(tagger, (tagger, 'k'))
-        lab = '$1 / \epsilon_{{ b }} = $ {rej:.0f}'.format(
-            rej=1/b_eff, tname=label)
-        vc, vu = rej_curves[b_eff]
-        ax.plot(vc, vu, label=lab, color=color, linewidth=_line_width,
-                linestyle=linestyle)
-    legprops = dict(size=textsize)
-    leg = ax.legend(prop=legprops, framealpha=0, loc='lower left',
-                    labelspacing=0.1, title='$b$-rejection')
-    leg.get_title().set_fontsize(textsize)
-
-    _setup_1d_ctag_legs(ax, textsize, official=True, approval=approval)
-    ax.set_xlim(0.10, 0.5)
-    ax.set_ylim(1, 1e3)
-
-    fig.tight_layout(pad=0, h_pad=0, w_pad=0)
-    if not isdir(out_dir):
-        os.mkdir(out_dir)
-    file_name = '{}/{}-ctag-roc{}'.format(out_dir, tagger, ext)
-    canvas.print_figure(file_name, bbox_inches='tight')
-
-_mv1uc_name = 'mv'
-_mv1uc_disp = 'MV1 + MV1c'
 def make_plots(in_file_name, cache_name, out_dir, ext):
     """
     Top level routine to make plots from tagger output distributions
     """
     with h5py.File(in_file_name, 'r') as in_file:
         with h5py.File(cache_name, 'a') as out_file:
-            _make_rejrej(in_file, out_file, tagger='gaia')
-            _make_rejrej(in_file, out_file, tagger='jfc')
-            _make_rejrej(in_file, out_file, tagger='jfit')
-            _make_rejrej(in_file, out_file, tagger=_mv1uc_name)
+            make_rejrej(in_file, out_file, tagger='gaia')
+            make_rejrej(in_file, out_file, tagger='jfc')
+            make_rejrej(in_file, out_file, tagger='jfit')
+            make_rejrej(in_file, out_file, tagger=mv1uc_name)
 
     if not isdir(out_dir):
         os.mkdir(out_dir)
@@ -112,41 +47,36 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         draw_ctag_ratio(cache, out_dir, ext)
         draw_ctag_ratio(cache, out_dir, ext, tagger='jfit',
                         tagger_disp='COMBNN', vmax=1.9)
-        draw_ctag_ratio(cache, out_dir, ext, tagger=_mv1uc_name,
-                        tagger_disp=_mv1uc_disp, vmax=1.9)
+        draw_ctag_ratio(cache, out_dir, ext, tagger=mv1uc_name,
+                        tagger_disp=mv1uc_disp, vmax=1.9)
         draw_ctag_ratio(
-            cache, out_dir, ext, tagger=_mv1uc_name,
-            tagger_disp=_mv1uc_disp,
+            cache, out_dir, ext, tagger=mv1uc_name,
+            tagger_disp=mv1uc_disp,
             num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
         draw_simple_rejrej(cache, out_dir, ext)
         draw_xkcd_rejrej(cache, out_dir, ext)
         with h5py.File(in_file_name, 'r') as in_file:
             draw_cprob_rejrej(cache, in_file, out_dir, ext)
 
-_leg_labels_colors = {
-    'gaia':('GAIA','red'), _mv1uc_name:(_mv1uc_disp,'blue'),
-    'jfc':('JetFitterCharm','darkgreen'),
-    'jfit':('JetFitterCOMBNN','orange'),
-}
 def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1, reject='U'):
     textsize=_text_size
     taggers = {}
     with h5py.File(in_file_name, 'r') as in_file:
-        for tag in ['gaia', _mv1uc_name, 'jfc', 'jfit']:
-            taggers[tag] = _get_c_vs_u_eff_const_beff(
+        for tag in ['gaia', mv1uc_name, 'jfc', 'jfit']:
+            taggers[tag] = get_c_vs_u_const_beff(
                 in_file, tag, b_eff=b_eff, reject=reject)
 
     fig = Figure(figsize=_fig_size)
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     for tname, (vc, vu) in taggers.items():
-        label, color = _leg_labels_colors.get(tname, (tname, 'k'))
+        label, color = leg_labels_colors.get(tname, (tname, 'k'))
         ax.plot(vc, vu, label=label, color=color, linewidth=_line_width)
     leg = ax.legend(title='$b$-rejection = {}'.format(1/b_eff),
                     prop={'size':textsize})
     leg.get_title().set_fontsize(textsize)
 
-    _setup_1d_ctag_legs(ax, textsize, reject=reject)
+    setup_1d_ctag_legs(ax, textsize, reject=reject)
 
     fig.tight_layout(pad=0, h_pad=0, w_pad=0)
     if not isdir(out_dir):
@@ -163,8 +93,8 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
     taggers = {x:{} for x in b_effs}
     with h5py.File(in_file_name, 'r') as in_file:
         for b_eff in taggers:
-            for tag in ['gaia', _mv1uc_name]:
-                taggers[b_eff][tag] = _get_c_vs_u_eff_const_beff(
+            for tag in ['gaia', mv1uc_name]:
+                taggers[b_eff][tag] = get_c_vs_u_const_beff(
                     in_file, tag, b_eff=b_eff)
 
     fig = Figure(figsize=_fig_size)
@@ -172,7 +102,7 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
     ax = fig.add_subplot(1,1,1)
     for b_eff, linestyle in zip(b_effs, b_eff_styles):
         for tname, (vc, vu) in taggers[b_eff].items():
-            label, color = _leg_labels_colors.get(tname, (tname, 'k'))
+            label, color = leg_labels_colors.get(tname, (tname, 'k'))
             lab = '$1 / \epsilon_{{ b }} = $ {rej:.0f}, {tname}'.format(
                 rej=1/b_eff, tname=label)
             ax.plot(vc, vu, label=lab, color=color, linewidth=_line_width,
@@ -181,7 +111,7 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
     leg = ax.legend(prop=legprops)
     leg.get_title().set_fontsize(textsize)
 
-    _setup_1d_ctag_legs(ax, textsize)
+    setup_1d_ctag_legs(ax, textsize)
 
     fig.tight_layout(pad=0, h_pad=0, w_pad=0)
     if not isdir(out_dir):
@@ -193,7 +123,7 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
 # _________________________________________________________________________
 # common utility functions
 
-def _setup_1d_ctag_legs(ax, textsize, reject='U', official=False,
+def setup_1d_ctag_legs(ax, textsize, reject='U', official=False,
                         approval='Internal'):
     ax.set_yscale('log')
     formatter = FuncFormatter(log_formatting)
@@ -210,8 +140,6 @@ def _setup_1d_ctag_legs(ax, textsize, reject='U', official=False,
         add_atlas(ax, x + 0.13, 0.9, size=size, approval=approval)
         add_official_garbage(ax, x, 0.9 - ysp, size=size, ysp=ysp)
 
-def _peters_lookup(flavor, tagger, binning):
-    return '{}/{}'.format(flavor, tagger)
 
 def _get_hist_name(flavor, tagger, binning):
     return '{}/ctag/{}/{}'.format(flavor, binning, tagger)
@@ -237,7 +165,7 @@ def _get_eff_hist(int_counts):
 # __________________________________________________________________________
 # 'plumbing' level routines to calculate the things we'll later plot
 
-def _make_rejrej(in_file, out_file, tagger='gaia', binning='all',
+def make_rejrej(in_file, out_file, tagger='gaia', binning='all',
                  lookup=_get_hist_name):
     """
     Builds 2d efficiency arrays, binned by rejection.
@@ -270,7 +198,7 @@ def _make_rejrej(in_file, out_file, tagger='gaia', binning='all',
     saved_ds = out_file[tagger].create_dataset(binning, data=rej_array)
     _save_rej_attrs(saved_ds, rej_builder, 'BUC')
 
-def _make_rejrej_btag(in_file, out_file, tagger='gaia', binning='all',
+def make_rejrej_btag(in_file, out_file, tagger='gaia', binning='all',
                       lookup=_get_hist_name_btag):
     """
     Builds 2d efficiency arrays, binned by rejection.
@@ -363,7 +291,7 @@ class RejRejComp(object):
                 out_array[x, y] = max(z, out_array[x, y])
         return out_array
 
-def _get_c_vs_u_eff_const_beff(in_file, tagger, b_eff=0.1, binning='all',
+def get_c_vs_u_const_beff(in_file, tagger, b_eff=0.1, binning='all',
                                reject='U', lookup=_get_hist_name):
     """
     Returns (c efficiency, X rejection) tuple for a given b-tagging
@@ -715,7 +643,7 @@ def _label_axes(ax, ds, textsize=_text_size):
 
 def _get_arr_extent(ds):
     """
-    Retreve the extent of an array stored by _make_rejrej.
+    Retreve the extent of an array stored by make_rejrej.
     """
     try:
         xmin = ds.attrs['x_min']
