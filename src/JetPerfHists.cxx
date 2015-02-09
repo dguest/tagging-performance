@@ -38,18 +38,11 @@ BtagHists::BtagHists() :
   const Axis mv2_axis = {"x", N_BINS, -1.0, 1.0, ""};
   const Axis gaia_axis = {"x", N_BINS, GAIA_LOW, GAIA_HIGH, ""};
 
-  const Axis gaia_2d_axis = {"x", N_2AX_BINS, GAIA_LOW, GAIA_HIGH, ""};
-  Axis gaia_anti_u = gaia_axis;
-  gaia_anti_u.name = "antiU";
-  Axis gaia_anti_c = gaia_axis;
-  gaia_anti_c.name = "antiC";
-
   m_mv1 = new Histogram({mv1_axis}, hflag);
   m_mv1c = new Histogram({mv1_axis}, hflag);
   m_mvb = new Histogram({mv2_axis}, hflag);
   m_gaia_anti_light = new Histogram({gaia_axis}, hflag);
   m_gaia_anti_charm = new Histogram({gaia_axis}, hflag);
-  m_gaia_2d = new Histogram({gaia_anti_u, gaia_anti_c}, hflag);
   m_gaia_gr1 = new Histogram({gaia_axis}, hflag);
   m_mv2c00 = new Histogram({mv2_axis}, hflag);
   m_mv2c10 = new Histogram({mv2_axis}, hflag);
@@ -62,7 +55,6 @@ BtagHists::~BtagHists() {
   delete m_mvb;
   delete m_gaia_anti_light;
   delete m_gaia_anti_charm;
-  delete m_gaia_2d;
   delete m_gaia_gr1;
   delete m_mv2c00;
   delete m_mv2c10;
@@ -75,7 +67,6 @@ void BtagHists::fill(const Jet& jet, double weight) {
   m_mvb->fill(jet.mvb, weight);
   m_gaia_anti_light->fill(btagAntiU(jet.gaia), weight);
   m_gaia_anti_charm->fill(btagAntiC(jet.gaia), weight);
-  m_gaia_2d->fill({btagAntiU(jet.gaia), btagAntiC(jet.gaia)}, weight);
   m_gaia_gr1->fill(gr1(jet.gaia), weight);
   m_mv2c00->fill(jet.mv2c00, weight);
   m_mv2c10->fill(jet.mv2c10, weight);
@@ -88,7 +79,6 @@ void BtagHists::writeTo(H5::CommonFG& fg) {
   m_mvb->write_to(fg, "mvb");
   m_gaia_anti_light->write_to(fg, "gaiaAntiU");
   m_gaia_anti_charm->write_to(fg, "gaiaAntiC");
-  m_gaia_2d->write_to(fg, "gaia2d");
   m_gaia_gr1->write_to(fg, "gaiaGr1");
   m_mv2c00->write_to(fg, "mv2c00");
   m_mv2c10->write_to(fg, "mv2c10");
@@ -101,7 +91,8 @@ CtagHists::CtagHists() :
   m_gaia(0),
   m_jfc(0),
   m_jfit(0),
-  m_gaia_c(0)
+  m_gaia_c(0),
+  m_gaia_btag(0)
 {
   using namespace hist;
   unsigned hflag = hist::eat_nan;
@@ -109,13 +100,16 @@ CtagHists::CtagHists() :
 
   Axis gaia_anti_b = gaia_axis;
   gaia_anti_b.name = "antiB";
-
   Axis gaia_anti_u = gaia_axis;
   gaia_anti_u.name = "antiU";
+  Axis gaia_anti_c = gaia_axis;
+  gaia_anti_c.name = "antiC";
+
   m_gaia = new Histogram({gaia_anti_u, gaia_anti_b}, hflag);
   m_jfc = new Histogram({gaia_anti_u, gaia_anti_b}, hflag);
   m_jfit = new Histogram({gaia_anti_u, gaia_anti_b}, hflag);
   m_gaia_c = new Histogram(N_BINS, 0.0, 1.0, "", hflag);
+  m_gaia_btag = new Histogram({gaia_anti_u, gaia_anti_c}, hflag);
 
   // The (obviously terrible) combination of MV1 and MV1c
   m_fabtag = new Histogram({
@@ -130,6 +124,7 @@ CtagHists::~CtagHists() {
   delete m_jfit;
   delete m_gaia_c;
   delete m_fabtag;
+  delete m_gaia_btag;
 }
 
 void CtagHists::fill(const Jet& jet, double weight) {
@@ -137,6 +132,7 @@ void CtagHists::fill(const Jet& jet, double weight) {
   m_jfc->fill({ctagAntiU(jet.jfc), ctagAntiB(jet.jfc)}, weight);
   m_jfit->fill({ctagAntiU(jet.jfit), ctagAntiB(jet.jfit)}, weight);
   m_gaia_c->fill(jet.gaia.pc, weight);
+  m_gaia_btag->fill({btagAntiU(jet.gaia), btagAntiC(jet.gaia)}, weight);
 
   // use (1 - mv1c) to select c and light jets. Then use mv1 to remove
   // the light jets.
@@ -148,6 +144,7 @@ void CtagHists::writeTo(H5::CommonFG& fg) {
   m_jfc->write_to(fg, "jfc");
   m_jfit->write_to(fg, "jfit");
   m_gaia_c->write_to(fg, "gaiaC");
+  m_gaia_btag->write_to(fg, "gaiaBtag");
   m_fabtag->write_to(fg, "mv");
 }
 
