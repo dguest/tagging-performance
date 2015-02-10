@@ -53,6 +53,10 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
             cache, out_dir, ext, tagger=mv1uc_name,
             tagger_disp=mv1uc_disp,
             num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
+        draw_ctag_ratio(
+            cache, out_dir, ext, tagger='jfit',
+            tagger_disp='COMBNN',
+            num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
         draw_simple_rejrej(cache, out_dir, ext)
         draw_xkcd_rejrej(cache, out_dir, ext)
         with h5py.File(in_file_name, 'r') as in_file:
