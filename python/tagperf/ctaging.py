@@ -91,13 +91,13 @@ def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1, reject='U'):
 
 _b_eff_styles = ['solid','dashed','dotted']
 def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
-    textsize = _text_size
+    textsize = _text_size - 2
     b_eff_styles = _b_eff_styles
 
     taggers = {x:{} for x in b_effs}
     with h5py.File(in_file_name, 'r') as in_file:
         for b_eff in taggers:
-            for tag in ['gaia', mv1uc_name]:
+            for tag in ['gaia', 'jfit','jfc']:
                 taggers[b_eff][tag] = get_c_vs_u_const_beff(
                     in_file, tag, b_eff=b_eff)
 
@@ -111,6 +111,7 @@ def make_1d_overlay(in_file_name, out_dir, ext, b_effs=[0.1, 0.2]):
                 rej=1/b_eff, tname=label)
             ax.plot(vc, vu, label=lab, color=color, linewidth=_line_width,
                     linestyle=linestyle)
+    ax.set_xlim(0.0, 0.5)
     legprops = {'size':textsize}
     leg = ax.legend(prop=legprops)
     leg.get_title().set_fontsize(textsize)
