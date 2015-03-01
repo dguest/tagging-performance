@@ -39,7 +39,7 @@ your python search path.
 
 These packages are fairly standard for python data analysis, and thus quite
 easy to install and use. On most systems they can be installed with the
-package manager, or using something like `python2.7 setup.py install`. Note
+package manager, or using something like `python3 setup.py install`. Note
 that ROOT is **not** used (or required) for plotting.
 
 - [Python 3.3 or higher][1] (when installing from source, use `--enable-shared`)
