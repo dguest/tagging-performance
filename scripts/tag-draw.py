@@ -53,7 +53,7 @@ def c1d(args):
     print('making ctag 1d plots')
     b_effs = [0.125, 0.2]
     ctaging.make_1d_overlay(args.hdf_file, args.out_dir, args.ext,
-                            b_effs=b_effs)
+                            b_effs=b_effs, subset=args.taggers)
     for ef in b_effs:
         ctaging.make_1d_plots(args.hdf_file, args.out_dir, args.ext,
                               b_eff=ef)
