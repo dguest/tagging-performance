@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 from os.path import isdir
 import os
 
+_line_width = 2
+
 def make_plots(in_file_name, out_dir, ext, propaganda=False, subset=None):
     bl = 'mv1' if propaganda else 'gaiaGr1'
     ext_args = dict(
@@ -69,10 +71,10 @@ def draw_btag_roc(in_file, out_dir, min_eff=0.5, ext='.pdf',
             color = colors[tname]
         valid_x = x_pts[valid_eff]
         valid_y = y_pts[valid_eff]
-        ax.plot(valid_x, valid_y, '-', label=tname, color=color)
+        ax.plot(valid_x, valid_y, '-', label=tname, color=color, lw=_line_width)
         if base_x is not None and tagger != baseline:
             interp_y = np.interp(valid_x, base_x, base_y)
-            ra.plot(valid_x, valid_y / interp_y, color=color)
+            ra.plot(valid_x, valid_y / interp_y, color=color, lw=_line_width)
     if not isdir(out_dir):
         os.mkdir(out_dir)
     ax.legend()
