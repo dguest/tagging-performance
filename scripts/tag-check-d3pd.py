@@ -14,9 +14,9 @@ def get_args():
     return parser.parse_args(sys.argv[1:])
 
 def _get_eff(dataset, cuts):
-    # ACHTUNG: the bounds should be read out of the dataset (this is
-    # a short-term hack because the DS isn't formated right)
-    bounds = [(-10, 10)]*2
+    mins = dataset.attrs['min']
+    maxes = dataset.attrs['max']
+    bounds = zip(mins, maxes)
     n_bins = [x - 2 for x in dataset.shape]
     array = np.asarray(dataset)
     bin_edges = [np.linspace(*b, num=n) for b, n in zip(bounds, n_bins)]
@@ -33,7 +33,6 @@ def _check_tagger_eff(h5, tagger, cuts):
     for flav in ['U','C','B']:
         eff = _get_eff(h5[flav]['ctag']['all'][tagger], cuts)
         print(flav, eff, 1/eff)
-        
 
 def run():
     args = get_args()

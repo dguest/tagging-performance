@@ -23,6 +23,7 @@ _fig_size = (_fig_edge, _fig_edge * 3/4)
 _square_fig_size = (_fig_edge, _fig_edge)
 _line_width = 1.8
 
+_jfc_run1_op = [0.95, -0.9]
 
 # __________________________________________________________________________
 # top level functions
@@ -37,30 +38,33 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
             make_rejrej(in_file, out_file, tagger='jfc')
             make_rejrej(in_file, out_file, tagger='jfit')
             make_rejrej(in_file, out_file, tagger=mv1uc_name)
+        jfc_urbrce_run1 = _get_urej_brej_ceff(in_file,'jfc', _jfc_run1_op)
 
     if not isdir(out_dir):
         os.mkdir(out_dir)
 
     with h5py.File(cache_name, 'r') as cache:
-        draw_ctag_rejrej(cache, out_dir, ext)
-        draw_contour_rejrej(cache, out_dir, ext)
-        draw_ctag_ratio(cache, out_dir, ext)
-        draw_ctag_ratio(cache, out_dir, ext, tagger='jfit',
-                        tagger_disp='COMBNN', vmax=1.9)
-        draw_ctag_ratio(cache, out_dir, ext, tagger=mv1uc_name,
-                        tagger_disp=mv1uc_disp, vmax=1.9)
-        draw_ctag_ratio(
-            cache, out_dir, ext, tagger=mv1uc_name,
-            tagger_disp=mv1uc_disp,
-            num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
-        draw_ctag_ratio(
-            cache, out_dir, ext, tagger='jfit',
-            tagger_disp='COMBNN',
-            num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
-        draw_simple_rejrej(cache, out_dir, ext)
-        draw_xkcd_rejrej(cache, out_dir, ext)
-        with h5py.File(in_file_name, 'r') as in_file:
-            draw_cprob_rejrej(cache, in_file, out_dir, ext)
+        # draw_ctag_rejrej(cache, out_dir, ext)
+        # draw_contour_rejrej(cache, out_dir, ext)
+        # draw_ctag_ratio(cache, out_dir, ext)
+        # draw_ctag_ratio(cache, out_dir, ext, tagger='jfit',
+        #                 tagger_disp='COMBNN', vmax=1.9)
+        # draw_ctag_ratio(cache, out_dir, ext, tagger=mv1uc_name,
+        #                 tagger_disp=mv1uc_disp, vmax=1.9)
+        # draw_ctag_ratio(
+        #     cache, out_dir, ext, tagger=mv1uc_name,
+        #     tagger_disp=mv1uc_disp,
+        #     num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
+        # draw_ctag_ratio(
+        #     cache, out_dir, ext, tagger='jfit',
+        #     tagger_disp='COMBNN',
+        #     num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
+        draw_simple_rejrej(
+            cache, out_dir, ext, points=[jfc_urbrce_run1],
+            official=True, approval=None)
+        # draw_xkcd_rejrej(cache, out_dir, ext)
+        # with h5py.File(in_file_name, 'r') as in_file:
+        #     draw_cprob_rejrej(cache, in_file, out_dir, ext)
 
 def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1, reject='U'):
     textsize=_text_size
@@ -164,6 +168,31 @@ def _get_rej_hist(int_counts):
 
 def _get_eff_hist(int_counts):
     return int_counts / int_counts.max()
+
+# lookup function for operating points
+
+def _get_urej_brej_ceff(h5, tagger, cuts, lookup=_get_hist_name):
+    def eff(flavor):
+        hist_name = lookup(flavor, tagger=tagger, binning='all')
+        return _get_eff(h5[hist_name], cuts)
+    return 1/eff('U'), 1/eff('B'), eff('C')
+
+def _get_eff(dataset, cuts):
+    mins = dataset.attrs['min']
+    maxes = dataset.attrs['max']
+    bounds = zip(mins, maxes)
+    n_bins = [x - 2 for x in dataset.shape]
+    array = np.asarray(dataset)
+    bin_edges = [np.linspace(*b, num=n) for b, n in zip(bounds, n_bins)]
+    slices = []
+    for cutval, edges in zip(cuts, bin_edges):
+        dists = np.abs(edges - cutval)
+        closest = np.argmin(dists)
+        slices.append(slice(closest, None))
+    passing = array[slices].sum()
+    total = array.sum()
+    return passing / total
+
 
 # __________________________________________________________________________
 # 'plumbing' level routines to calculate the things we'll later plot
@@ -428,8 +457,18 @@ def draw_contour_rejrej(in_file, out_dir, ext='.pdf'):
     out_name = '{}/rejrej-cont{}'.format(out_dir, ext)
     canvas.print_figure(out_name, bbox_inches='tight')
 
+def _add_rejrej_official(ax, approval, zax, size=10):
+    ysp = 0.1*size/16
+    zlab = '{}-jet efficiency'.format(zax)
+    lab_ypos = 0.90 - ysp*4
+    ax.text(0.97, lab_ypos, 'Contours give \n ' + zlab,
+            transform=ax.transAxes, size=size, ha='right')
+    add_official_garbage(ax, 0.97, 0.93, size=size, ysp=ysp, ha='right')
+    if approval is not None:
+        add_atlas(ax, 0.2, 0.92, size=size*1.2, approval=approval)
+
 def draw_simple_rejrej(in_file, out_dir, ext='.pdf', tagger='gaia',
-                       official=False, approval='Internal'):
+                       official=False, approval='Internal', points=[]):
     """
     Draw iso-efficiency contours for one tagger (no colors).
     """
@@ -441,15 +480,18 @@ def draw_simple_rejrej(in_file, out_dir, ext='.pdf', tagger='gaia',
     label_rejrej_axes(ax, ds)
     levels = np.linspace(0.2, 0.5, 7)
     add_contour(ax, ds, opts=dict(levels=levels, textsize=10))
+    zax = long_particle_names[ds.attrs['xyz'][2]]
     if official:
-        size = 10
-        ysp = 0.1*size/16
-        add_official_garbage(ax, 0.97, 0.93, size=size, ysp=ysp, ha='right')
-        add_atlas(ax, 0.2, 0.92, size=size*1.2, approval=approval)
-        z = long_particle_names[ds.attrs['xyz'][2]]
-        zlab = '{}-jet efficiency'.format(z)
-        ax.text(0.97, 0.90 - ysp*4, 'Contours give \n ' + zlab,
-                transform=ax.transAxes, size=size, ha='right')
+        _add_rejrej_official(ax, approval, zax=zax, size=9)
+
+    for y, x, z in points:
+        ax.scatter(x, y, s=20, c='yellow')
+        ax.annotate(
+            r'$\epsilon_{{c}}$ = {:.2f}'.format(z), (x,y), xytext=(-8,0),
+            textcoords='offset points', size='x-small',
+            bbox = dict(boxstyle = 'round', fc = 'yellow', alpha = 1),
+            # arrowprops = dict(arrowstyle = '->'),
+            ha='right', va='top')
 
     out_name = '{}/rejrej-simple{}'.format(out_dir, ext)
     canvas.print_figure(out_name, bbox_inches='tight')
