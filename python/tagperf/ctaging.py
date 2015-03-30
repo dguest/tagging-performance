@@ -44,27 +44,27 @@ def make_plots(in_file_name, cache_name, out_dir, ext):
         os.mkdir(out_dir)
 
     with h5py.File(cache_name, 'r') as cache:
-        # draw_ctag_rejrej(cache, out_dir, ext)
-        # draw_contour_rejrej(cache, out_dir, ext)
-        # draw_ctag_ratio(cache, out_dir, ext)
-        # draw_ctag_ratio(cache, out_dir, ext, tagger='jfit',
-        #                 tagger_disp='COMBNN', vmax=1.9)
-        # draw_ctag_ratio(cache, out_dir, ext, tagger=mv1uc_name,
-        #                 tagger_disp=mv1uc_disp, vmax=1.9)
-        # draw_ctag_ratio(
-        #     cache, out_dir, ext, tagger=mv1uc_name,
-        #     tagger_disp=mv1uc_disp,
-        #     num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
-        # draw_ctag_ratio(
-        #     cache, out_dir, ext, tagger='jfit',
-        #     tagger_disp='COMBNN',
-        #     num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
+        draw_ctag_rejrej(cache, out_dir, ext)
+        draw_contour_rejrej(cache, out_dir, ext)
+        draw_ctag_ratio(cache, out_dir, ext)
+        draw_ctag_ratio(cache, out_dir, ext, tagger='jfit',
+                        tagger_disp='COMBNN', vmax=1.9)
+        draw_ctag_ratio(cache, out_dir, ext, tagger=mv1uc_name,
+                        tagger_disp=mv1uc_disp, vmax=1.9)
+        draw_ctag_ratio(
+            cache, out_dir, ext, tagger=mv1uc_name,
+            tagger_disp=mv1uc_disp,
+            num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
+        draw_ctag_ratio(
+            cache, out_dir, ext, tagger='jfit',
+            tagger_disp='COMBNN',
+            num_tagger='jfc',num_tagger_disp='JetFitterCharm', vmax=1.9)
         draw_simple_rejrej(
             cache, out_dir, ext, points=[jfc_urbrce_run1],
             official=True, approval=None)
-        # draw_xkcd_rejrej(cache, out_dir, ext)
-        # with h5py.File(in_file_name, 'r') as in_file:
-        #     draw_cprob_rejrej(cache, in_file, out_dir, ext)
+        draw_xkcd_rejrej(cache, out_dir, ext)
+        with h5py.File(in_file_name, 'r') as in_file:
+            draw_cprob_rejrej(cache, in_file, out_dir, ext)
 
 def make_1d_plots(in_file_name, out_dir, ext, b_eff=0.1, reject='U'):
     textsize=_text_size
