@@ -17,7 +17,7 @@ def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5,
         planes = {x: CountPlane(in_file[x][tagger]) for x in 'BUC'}
     xlims = ANTI_LIGHT_RANGE
     ylims = ANTI_B_RANGE
-    rgb = np.dstack([planes[x].subplane(xlims, ylims) for x in 'BCU'])
+    rgb = np.dstack([planes[x].crop(xlims, ylims) for x in 'BCU'])
     rgb = np.log(rgb + 1)
     for iii in range(rgb.shape[2]):
         maxval = (rgb[:,:,iii].max() * maxcut)
@@ -26,7 +26,9 @@ def draw_cut_plane(hdf_file, out_dir, ext, tagger='jfc', maxcut=0.5,
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(1,1,1)
     imextent = list(xlims) + list(ylims)
-    ax.imshow(rgb, origin='lower', extent=imextent, aspect='auto')
+    # transpose arrays so they draw properly (weird property of imshow)
+    ax.imshow(rgb.swapaxes(0,1),
+              origin='lower', extent=imextent, aspect='auto')
     ax.set_xlim(*xlims)
     ax.set_ylim(*ylims)
     _label_axes(ax)
@@ -90,22 +92,36 @@ def _add_sim_info(ax, x, y, size=16):
     ax.text(x, y, text, size=size,
             transform=ax.transAxes, bbox=props, va='bottom', ha='left')
 
+
+
 class CountPlane:
+    """Handler for Dataset -> imshow."""
+
     def __init__(self, ds):
         ar = np.array(ds)[1:-1,1:-1]
-        xextent = [ds.attrs[x][1] for x in ['min', 'max']]
-        yextent = [ds.attrs[x][0] for x in ['min', 'max']]
-        self.xvalues = np.linspace(*xextent, num=(ar.shape[1] + 1))
-        self.yvalues = np.linspace(*yextent, num=(ar.shape[0] + 1))
-        self.array = ar.T
-    def subplane(self, xlims=ANTI_LIGHT_RANGE, ylims=ANTI_B_RANGE):
+        xextent = [ds.attrs[x][0] for x in ['min', 'max']]
+        yextent = [ds.attrs[x][1] for x in ['min', 'max']]
+        self.xvalues = np.linspace(*xextent, num=(ar.shape[0] + 1))
+        self.yvalues = np.linspace(*yextent, num=(ar.shape[1] + 1))
+        self.array = ar
+
+
+    def crop(self, xlims=ANTI_LIGHT_RANGE, ylims=ANTI_B_RANGE):
         xv, yv = self.xvalues, self.yvalues
         xvalid_idx = np.nonzero((xlims[0] <= xv) & (xv <= xlims[1]))[0]
         xlow, xhigh = xvalid_idx[0], xvalid_idx[-1]
         yvalid_idx = np.nonzero((ylims[0] <= yv) & (yv <= ylims[1]))[0]
         ylow, yhigh = yvalid_idx[0], yvalid_idx[-1]
-        subarray = self.array[ylow:yhigh, xlow:xhigh]
+        subarray = self.array[xlow:xhigh, ylow:yhigh]
+
+        # check to make sure we're not messing up bin edges
+        xe, ye = xv[[xlow,xhigh]], yv[[ylow,yhigh]]
+        assert np.all(np.isclose(xlims, xe)), 'x bin edge mismatch in crop'
+        assert np.all(np.isclose(ylims, ye)), 'y bin edge mismatch in crop'
+
         return subarray
+
+
     def project(self, axis, lims=(-10,10)):
         """return x, y plottable values"""
         assert axis.lower() in 'xy', 'must project along x or y'
@@ -113,7 +129,7 @@ class CountPlane:
         valid_idx = np.nonzero((lims[0] <= vals) & (vals <= lims[1]))[0]
         rng = slice(valid_idx[0], valid_idx[-1])
         if axis == 'x':
-            yvals = self.array[:, rng].sum(0)
-        elif axis == 'y':
             yvals = self.array[rng, :].sum(1)
+        elif axis == 'y':
+            yvals = self.array[:, rng].sum(0)
         return vals[rng], yvals
