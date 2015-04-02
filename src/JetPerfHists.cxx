@@ -30,7 +30,11 @@ BtagHists::BtagHists() :
   m_gaia_gr1(0),
   m_mv2c00(0),
   m_mv2c10(0),
-  m_mv2c20(0)
+  m_mv2c20(0),
+  m_jfc_anti_light(0),
+  m_jfc_anti_charm(0),
+  m_jfit_anti_light(0),
+  m_jfit_anti_charm(0)
 {
   using namespace hist;
   unsigned hflag = hist::eat_nan;
@@ -47,6 +51,10 @@ BtagHists::BtagHists() :
   m_mv2c00 = new Histogram({mv2_axis}, hflag);
   m_mv2c10 = new Histogram({mv2_axis}, hflag);
   m_mv2c20 = new Histogram({mv2_axis}, hflag);
+  m_jfc_anti_light = new Histogram({gaia_axis}, hflag);
+  m_jfc_anti_charm = new Histogram({gaia_axis}, hflag);
+  m_jfit_anti_light = new Histogram({gaia_axis}, hflag);
+  m_jfit_anti_charm = new Histogram({gaia_axis}, hflag);
 }
 
 BtagHists::~BtagHists() {
@@ -59,6 +67,10 @@ BtagHists::~BtagHists() {
   delete m_mv2c00;
   delete m_mv2c10;
   delete m_mv2c20;
+  delete m_jfc_anti_light;
+  delete m_jfc_anti_charm;
+  delete m_jfit_anti_light;
+  delete m_jfit_anti_charm;
 }
 
 void BtagHists::fill(const Jet& jet, double weight) {
@@ -71,6 +83,10 @@ void BtagHists::fill(const Jet& jet, double weight) {
   m_mv2c00->fill(jet.mv2c00, weight);
   m_mv2c10->fill(jet.mv2c10, weight);
   m_mv2c20->fill(jet.mv2c20, weight);
+  m_jfc_anti_light->fill(btagAntiU(jet.jfc), weight);
+  m_jfc_anti_charm->fill(btagAntiC(jet.jfc), weight);
+  m_jfit_anti_light->fill(btagAntiU(jet.jfit), weight);
+  m_jfit_anti_charm->fill(btagAntiC(jet.jfit), weight);
 }
 
 void BtagHists::writeTo(H5::CommonFG& fg) {
@@ -83,6 +99,10 @@ void BtagHists::writeTo(H5::CommonFG& fg) {
   m_mv2c00->write_to(fg, "mv2c00");
   m_mv2c10->write_to(fg, "mv2c10");
   m_mv2c20->write_to(fg, "mv2c20");
+  m_jfc_anti_light->write_to(fg, "jfcAntiU");
+  m_jfc_anti_charm->write_to(fg, "jfcAntiC");
+  m_jfit_anti_light->write_to(fg, "jfitAntiU");
+  m_jfit_anti_charm->write_to(fg, "jfitAntiC");
 }
 
 // ======== charm tag hists ==============

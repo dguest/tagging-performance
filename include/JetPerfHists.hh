@@ -36,6 +36,10 @@ private:
   Histogram* m_mv2c00;
   Histogram* m_mv2c10;
   Histogram* m_mv2c20;
+  Histogram* m_jfc_anti_light;
+  Histogram* m_jfc_anti_charm;
+  Histogram* m_jfit_anti_light;
+  Histogram* m_jfit_anti_charm;
 };
 
 class CtagHists {
